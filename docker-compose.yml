@@ -1,0 +1,35 @@
+version: '3'
+services:
+  backend:
+    build: ./backend
+    command: uvicorn app:app --host 0.0.0.0 --port 8000
+    restart: always
+    links:
+      - db
+    volumes:
+      - ./backend:/usr/src/backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  vue:
+    build: ./front
+    image: node:lts
+    container_name: vue_app_container
+    command: npm run serve
+    volumes:
+      - ./front:/usr/src/front
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres:11
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: cognitive
