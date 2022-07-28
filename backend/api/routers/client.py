@@ -16,6 +16,13 @@ from schemas.client import Message, CountChange
 router = APIRouter()
 
 
+async def get_key(key):
+    open("key", "w").write(key)
+    with open('key', 'rb') as keyfile:
+        key = serialization.load_pem_private_key(keyfile.read(), password=None)
+    return key
+
+
 @router.get('/', response_model=List[Client_Pydantic])
 async def list_all_clients():
     return await Client_Pydantic.from_queryset(ClientModel.all())
@@ -29,15 +36,14 @@ async def create_client(client: ClientIn_Pydantic):
 
 @router.post('/sign_message')
 async def sign_message(message: Message, client: Client_Pydantic = Depends(api_key_auth)):
-    try:
-        key = client.key.encode('utf-8')
-        sign_key = serialization.load_pem_private_key(key, password=None)
+    # try:
+    sign_key = await get_key(client.key)
 
-        message_bytes = base64.b64decode(message.message)
-        signature = sign_key.sign(message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
-        signed_message = base64.b64encode(signature).decode()
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': e.args})
+    message_bytes = base64.b64decode(message.message)
+    signature = sign_key.sign(message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
+    signed_message = base64.b64encode(signature).decode()
+    # except Exception as e:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': e.args})
     client = await ClientModel.get(id=client.id)
     client.count -= 1
     await client.save()
