@@ -45,6 +45,8 @@ async def sign_message(message: Message, client: Client_Pydantic = Depends(api_k
     # except Exception as e:
     #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': e.args})
     client = await ClientModel.get(id=client.id)
+    if client.count == 0:
+        raise {'status': 'bad request', 'message': 'Count below 1'}
     client.count -= 1
     await client.save()
     return {'status': 'ok', 'message': signed_message}
