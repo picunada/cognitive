@@ -10,7 +10,7 @@ class StatusEnum(str, Enum):
 
 
 class ClientModel(models.Model):
-    key = fields.CharField(max_length=1024)
+    key = fields.TextField()
     status: StatusEnum = fields.CharEnumField(StatusEnum, default=StatusEnum.ACTIVE)
     count = fields.IntField()
 

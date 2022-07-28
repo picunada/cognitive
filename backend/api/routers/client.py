@@ -36,16 +36,18 @@ async def create_client(client: ClientIn_Pydantic):
 
 @router.post('/sign_message')
 async def sign_message(message: Message, client: Client_Pydantic = Depends(api_key_auth)):
-    # try:
-    sign_key = await get_key(client.key)
+    try:
+        sign_key = await get_key(client.key)
 
-    message_bytes = base64.b64decode(message.message)
-    signature = sign_key.sign(message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
-    signed_message = base64.b64encode(signature).decode()
-    # except Exception as e:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': e.args})
+        message_bytes = base64.b64decode(message.message)
+        signature = sign_key.sign(message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
+        signed_message = base64.b64encode(signature).decode()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': f'{e}'})
     client = await ClientModel.get(id=client.id)
-    if client.count == 0:
+    if client.status == StatusEnum.BLOCKED:
+        return {'status': 'bad request', 'message': 'Blocked'}
+    if client.count <= 0:
         return {'status': 'bad request', 'message': 'Count below 1'}
     client.count -= 1
     await client.save()
