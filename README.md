@@ -34,9 +34,9 @@ docker-compose build
 ### Run docker compose
 ```shell
 # v2
-docker compose run
+docker compose up
 # or v1
-docker-compose run
+docker-compose up
 ```
 ---
 ## Documentation
