@@ -7,6 +7,12 @@ cp /backend/.env_example /backend/.env
 ### Env Settings
 
 ```shell
+# open .env
+# vim
+vim backend/.env
+# or nano
+nano backend/.env
+# then generate key 
 DATABASE_URL=postgres://root:root@db:5432/cognitive # database url
 SECRET_KEY=    # SECRET KEY for  hashing passwords (to generate: openssl rand -hex 32 )
 ALGORITHM=HS256 # manager pass hash algorithm
