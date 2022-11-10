@@ -10,6 +10,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
 COPY . .
 RUN pnpm build
 
+# ENV VITE_URL=http://localhost:8000
+
 FROM nginx:stable-alpine as production-stage
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html

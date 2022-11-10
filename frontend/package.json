@@ -20,6 +20,7 @@
     "@unocss/reset": "^0.45.28",
     "@vueuse/core": "^9.3.0",
     "@vueuse/head": "^0.9.7",
+    "esbuild": "^0.15.13",
     "nprogress": "^0.2.0",
     "pinia": "^2.0.22",
     "sass": "^1.55.0",
