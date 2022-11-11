@@ -22,7 +22,6 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = useStorage('refresh', '')
   const user = ref<User>()
   const authError = ref<string>()
-  const router = useRouter()
 
   const isAuthenticated: ComputedRef<boolean> = computed(() => user.value !== undefined)
 
@@ -38,7 +37,6 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await response.json() as TokenData
       accessToken.value = data.access
       refreshToken.value = data.refresh
-      router.push('/')
     }).catch(error => authError.value = error)
   }
 
@@ -60,7 +58,6 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = undefined
     accessToken.value = undefined
     refreshToken.value = undefined
-    router.push('/')
   }
 
   return {

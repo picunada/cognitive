@@ -12,20 +12,23 @@ services:
     volumes: 
       - ./data/postgres:/var/lib/postgresql/data
   frontend:
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
+    image: node:latest
+    container_name: cogntive_frontend
+    volumes:
+      - ./frontend:/frontend
+    working_dir: /frontend
+    command: 'npm run dev'
     environment:
-      VITE_URL: http://backend:8000
+      VITE_URL: http://localhost:8000
     ports:
-      - "3333:80"
+      - "3333:3333"
     restart: on-failure
 
   backend:
     build:
       context: .
       dockerfile: ./config/Dockerfile
-    container_name: investigators_backend
+    container_name: cogntive_backend
     volumes:
       - ./backend/:/code
     restart: always

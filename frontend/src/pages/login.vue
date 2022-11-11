@@ -2,6 +2,8 @@
 import type { LoginData } from '~/store/auth'
 
 const auth = useAuthStore()
+const router = useRouter()
+
 const loginData = ref<LoginData>({
   email: '',
   password: '',
@@ -12,7 +14,8 @@ const isValidated = computed(() => loginData.value.email.length > 0 && loginData
 
 <template>
   <div flex h-full w-full items-center justify-center px10>
-    <div flex flex-col w-full items-center justify-center max-w-120 bg-neutral-100 dark:bg-dark-700 gap4 rounded-12px p3>
+    <div flex flex-col w-full items-center justify-center max-w-120 bg-neutral-100 dark:bg-dark-700 gap4 rounded-12px
+      p3>
       <h1 title2>
         Login
       </h1>
@@ -30,7 +33,7 @@ const isValidated = computed(() => loginData.value.email.length > 0 && loginData
         </p>
         <input v-model="loginData.password" type="password" text-field w-full placeholder="Password">
       </div>
-      <button :disabled="!isValidated" btn text-25px @click="auth.login(loginData)">
+      <button :disabled="!isValidated" btn text-25px @click="auth.login(loginData).then(() => router.push('/'))">
         Submit
       </button>
     </div>
