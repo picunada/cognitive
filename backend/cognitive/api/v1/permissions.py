@@ -12,7 +12,7 @@ class AdminPermissions(BasePermission):
         return (
             request.user
             and request.user.is_authenticated
-            and (request.user.is_admin or request.user.is_superuser or request.user.role == User.ADMINISTRATOR)
+            and (request.user.is_superuser or request.user.role == User.ADMINISTRATOR)
         )
 
 

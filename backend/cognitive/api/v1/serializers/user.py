@@ -37,11 +37,10 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
     """
     token = serializers.SerializerMethodField()
     confirm_password = serializers.CharField(max_length=64, write_only=True)
-    rsa_key = serializers.CharField(max_length=4096,  write_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'rsa_key', 'password', 'confirm_password',
+        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'organization', 'password', 'confirm_password',
                   'token',)
         read_only_fields = ('id', 'token')
         extra_kwargs = {'password': {'write_only': True},
@@ -75,15 +74,7 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         if len(password) < 8:
             raise ValidationError({"password": ['Password too short']})
 
-        rsa_key = data.pop('rsa_key')
-
         user = super().create(data)
-
-        organization = Organization.objects.create(
-            name=f'{data.get("first_name")} {data.get("last_name")}',
-            hashed_key=rsa_key, status='active')
-
-        user.organization.set([organization])
 
         user.set_password(password)
         user.save()

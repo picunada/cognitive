@@ -17,6 +17,8 @@ export const useOrganizationStore = defineStore('organization', () => {
   const totalPages = ref<number>(1)
   const currentPage = ref<number>(1)
 
+  const organizationError = ref<String>()
+
   const fetchOrganizations = async (page: number, searchQuery?: string) => {
     let response: any
     if (searchQuery) {
@@ -57,6 +59,43 @@ export const useOrganizationStore = defineStore('organization', () => {
     return await response.json()
   }
 
+  const createOrganization = async (organization: Organization) => {
+    await fetch(`${BASE_URL}/api/v1/organization/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      },
+      body: JSON.stringify(organization),
+    }).then(async () => {
+      await fetchOrganizations(currentPage.value)
+    }).catch(error => organizationError.value = error)
+  }
+
+  const deleteOrganization = async (id: number) => {
+    await fetch(`${BASE_URL}/api/v1/organization/${id}/`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      },
+    }).then(async () => await fetchOrganizations(currentPage.value))
+  }
+
+  const updateOrganization = async (id: number, organization: Organization) => {
+    await fetch(`${BASE_URL}/api/v1/organization/${id}/`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      },
+      body: JSON.stringify(organization),
+    }).then(async () => await fetchOrganizations(currentPage.value))
+  }
+
   watch(currentPage, async (newV) => {
     await fetchOrganizations(newV)
   })
@@ -67,15 +106,19 @@ export const useOrganizationStore = defineStore('organization', () => {
       await fetchOrganizations(currentPage.value, newV)
     else
       fetchOrganizations(currentPage.value)
-  }, { debounce: 500, maxWait: 1000 })
+  }, { debounce: 300, maxWait: 2000 })
 
   return {
     organizations,
     totalPages,
     currentPage,
     searchQuery,
+    organizationError,
+    deleteOrganization,
     fetchOrganizations,
     generateKeyForOrganization,
+    createOrganization,
+    updateOrganization,
   }
 })
 

@@ -9,11 +9,13 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ClientModal: typeof import('./components/ClientModal.vue')['default']
     ClientTable: typeof import('./components/ClientTable.vue')['default']
+    ComboBox: typeof import('./components/ComboBox.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
     Header: typeof import('./components/Header.vue')['default']
     Menu: typeof import('./components/Menu.vue')['default']
     OrganizationModal: typeof import('./components/OrganizationModal.vue')['default']
+    OrganizationTable: typeof import('./components/OrganizationTable.vue')['default']
     Pagination: typeof import('./components/Pagination.vue')['default']
     Profile: typeof import('./components/Profile.vue')['default']
     ProfileLoading: typeof import('./components/ProfileLoading.vue')['default']
@@ -22,6 +24,8 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     Table: typeof import('./components/Table.vue')['default']
     TableLoading: typeof import('./components/TableLoading.vue')['default']
+    UserModal: typeof import('./components/UserModal.vue')['default']
     UserProfile: typeof import('./components/UserProfile.vue')['default']
+    UsersTable: typeof import('./components/UsersTable.vue')['default']
   }
 }

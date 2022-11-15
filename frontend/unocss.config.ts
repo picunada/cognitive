@@ -13,8 +13,8 @@ export default defineConfig({
   shortcuts: [
     ['btn', 'px-2 border-2 font-light border-rounded-10px opacity-75 text-truegray transition duration-200 ease-in-out dark:hover:text-white cursor-pointer hover:bg-sky-400 dark:hover:border-white hover:border-dark hover:text-dark disabled:cursor-default disabled:bg-neutral-300 disabled:dark:bg-dark-100 disabled:opacity-50'],
     ['icon-btn', 'inline-block cursor-pointer select-none opacity-75 transition duration-200 ease-in-out hover:opacity-100 hover:text-sky-400'],
-    ['text-field', 'flex h-36px w-250px items-center bg-neutral-200 dark:bg-dark8 px-3 rounded-10px opacity-75 text-gray-700 dark:text-gray-200 dark:hover:bg-dark hover:bg-neutral300 outline-none'],
-    ['animation', 'transition duration-200 ease-in-out'],
+    ['text-field', 'flex h-43px w-250px items-center bg-neutral-200 dark:bg-dark5 px-3 rounded-10px opacity-75 text-gray-700 dark:text-gray-200 dark:hover:bg-dark hover:bg-neutral300 dark:group-hover:bg-dark group-hover:bg-neutral300 outline-none'],
+    ['animation', 'transition duration-100 ease-in-out'],
     ['title1', 'text-30px lg:text-40px font-bold opacity-75 text-gray-700 dark:text-gray-200'],
     ['title2', 'text-25px lg:text-30px font-bold opacity-75 text-gray-700 dark:text-gray-200'],
     ['menu-btn', 'flex h-36px w-full items-center px-2 rounded-10px opacity-75 hover:text-sky-400 hover:bg-neutral200 hover:dark:bg-dark'],

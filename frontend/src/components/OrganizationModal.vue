@@ -6,7 +6,7 @@ const props = defineProps<{
   rsakey: string
 }>()
 
-const emit = defineEmits(['close', 'update:rsakey'])
+const emit = defineEmits(['close', 'update:rsakey', 'update-organization'])
 
 const isEditing = ref<boolean>(false)
 </script>
@@ -14,8 +14,9 @@ const isEditing = ref<boolean>(false)
 <template>
   <div>
     <Teleport to="body">
-      <div class="bg-dark-2/40 backdrop-blur-sm flex items-center justify-center w-full h-full fixed z-1 left-0 top-0 p4">
-        <div w-full max-w-200 bg-white dark:bg-dark-800 opacity-100 p4 rounded-4>
+      <div
+        class="bg-black/25 backdrop-blur-sm flex items-center justify-center w-full h-full fixed z-1 left-0 top-0 p4">
+        <div w-full max-w-xl bg-white dark:bg-dark-800 opacity-100 p4 rounded-4>
           <!-- Title -->
           <div flex items-center justify-between>
             <h1 title2>
@@ -27,12 +28,13 @@ const isEditing = ref<boolean>(false)
             </div>
           </div>
           <!-- Key -->
-          <div flex flex-col mt2>
+          <div flex flex-col max-h-100 mt2>
             <p text-13px mb1 ml2 opacity-40>
               RSA Key
             </p>
-            <div p4 bg-neutral-200 dark:bg-dark rounded-2>
-              <textarea v-if="isEditing" :value="organization.hashed_key" h-full w-full resize-none bg-neutral-200 dark:bg-dark overflow-clip @input="emit('update:rsakey', $event.target.value)" />
+            <div max-h-100 p4 bg-neutral-200 dark:bg-dark rounded-2>
+              <textarea v-if="isEditing" :value="organization.hashed_key" max-h-100 w-full resize-none bg-neutral-200
+                dark:bg-dark overflow-auto @input="emit('update:rsakey', $event.target?.value)" />
               <p v-else break-all>
                 {{ props.organization.hashed_key }}
               </p>
@@ -49,9 +51,12 @@ const isEditing = ref<boolean>(false)
               </p>
             </div>
           </div>
-          <div flex mt4>
+          <div flex justify-between mt4>
             <button btn text-lg>
               Generate new api-key
+            </button>
+            <button v-if="isEditing" btn text-lg hover:bg-green @click="emit('update-organization')">
+              Submit
             </button>
           </div>
         </div>

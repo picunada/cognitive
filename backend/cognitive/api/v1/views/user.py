@@ -35,7 +35,7 @@ class UserViewSet(ExtendedModelViewSet):
         'list': permissions.AllowAny,
         'update': (AdminPermissions | permissions.IsAuthenticated),
         'partial_update': (AdminPermissions | permissions.IsAuthenticated),
-        'delete': AdminPermissions,
+        'destroy': AdminPermissions,
         'my': permissions.IsAuthenticated,
         # 'password_reset': permissions.AllowAny,
         # 'password_reset_confirm': permissions.AllowAny

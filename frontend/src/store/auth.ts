@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User>()
   const authError = ref<string>()
 
-  const isAuthenticated: ComputedRef<boolean> = computed(() => user.value !== undefined)
+  const isAuthenticated: ComputedRef<boolean> = computed(() => accessToken.value !== '' && accessToken.value !== undefined)
 
   const login = async (credentials: LoginData) => {
     await fetch(`${BASE_URL}/api/v1/login`, {
@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     }).catch(error => authError.value = error)
   }
 
-  const logout = () => {
+  const logout = async () => {
     user.value = undefined
     accessToken.value = undefined
     refreshToken.value = undefined

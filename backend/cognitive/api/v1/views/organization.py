@@ -1,20 +1,21 @@
 import base64
 
+from cognitive.api.v1.permissions import (AdminPermissions,
+                                          HasOrganizationAPIKey,
+                                          ManagerPermissions)
+from cognitive.api.v1.serializers.organization import (
+    OrganizationCreateUpdateSerializer, OrganizationListSerializer,
+    SignMessageSerializer)
+from cognitive.api.v1.viewsets import ExtendedModelViewSet
+from cognitive.apps.organization.models import Organization, OrganizationAPIKey
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, utils
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_api_key.permissions import HasAPIKey
-
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding, utils
-
-from cognitive.api.v1.permissions import AdminPermissions, HasOrganizationAPIKey, ManagerPermissions
-from cognitive.api.v1.serializers.organization import OrganizationListSerializer, OrganizationCreateUpdateSerializer, SignMessageSerializer
-from cognitive.api.v1.viewsets import ExtendedModelViewSet
-from cognitive.apps.organization.models import Organization, OrganizationAPIKey
 
 
 def get_key(key):
@@ -47,7 +48,7 @@ class OrganizationViewSet(ExtendedModelViewSet):
     permission_map = {
         'list': permissions.AllowAny,
         'create': permissions.AllowAny,
-        'delete': permissions.AllowAny,
+        'destroy': permissions.AllowAny,
         'update': permissions.AllowAny,
         'partial_update': permissions.AllowAny,
         'get_new_key': permissions.AllowAny,
@@ -55,13 +56,6 @@ class OrganizationViewSet(ExtendedModelViewSet):
         'unblock': permissions.AllowAny,
         'sign_message': HasOrganizationAPIKey
     }
-
-    # permission_map = {
-    #     'create': (AdminPermissions | ManagerPermissions),
-    #     'delete': AdminPermissions,
-    #     'update': permissions.IsAuthenticated,
-    #     'partial_update': permissions.IsAuthenticated
-    # }
 
     def get_queryset(self):
         queryset = super().get_queryset()

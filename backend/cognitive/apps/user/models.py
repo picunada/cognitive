@@ -27,7 +27,6 @@ class UserManager(BaseUserManager):
         users = User.objects.filter(is_superuser=True)
         if users.exists():
             raise SuperUserAlreadyExists()
-        extra_fields.setdefault('is_admin', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', 'administrator')
 

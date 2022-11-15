@@ -7,3 +7,8 @@ export interface Organization {
   created_at: Date
   deleted_at: Date | null
 }
+
+export enum Status {
+  active = 'active',
+  blocked = 'blocked',
+}

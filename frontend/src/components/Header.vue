@@ -31,7 +31,7 @@ const router = useRouter()
                 <MenuItem v-slot="{ active }">
                 <button class="group flex w-full items-center rounded-md px-2 py-2 text-sm" :class="[
                   active ? 'bg-sky-500 text-white' : 'text-dark-900 dark:text-white',
-                ]" @click="auth.logout(), () => router.push('/')">
+                ]" @click="auth.logout().then(() => router.push('/'))">
                   <div i-ph:sign-out-duotone :active="active" class="mr-2 h-5 w-5 text-white" aria-hidden="true" />
                   Logout
                 </button>
