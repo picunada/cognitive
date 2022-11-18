@@ -1,4 +1,3 @@
-from enum import Enum
 from django.db import models
 from cognitive.apps.core.models import CreatedDeletedModel
 from rest_framework_api_key.models import AbstractAPIKey, BaseAPIKeyManager
@@ -18,6 +17,7 @@ class Organization(CreatedDeletedModel):
         choices=Status.choices,
         default=Status.ACTIVE,
     )
+    count = models.IntegerField()
 
 
 class OrganizationAPIKeyManager(BaseAPIKeyManager):

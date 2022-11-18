@@ -19,7 +19,7 @@ class UserViewSet(ExtendedModelViewSet):
                        filters.OrderingFilter, filters.SearchFilter]
 
     filterset_fields = ('role', 'organization__name', 'organization')
-    ordering_fields = ('date_joined', 'id')
+    ordering_fields = ('id')
     search_fields = ('first_name', 'last_name')
 
     serializer_class_map = {

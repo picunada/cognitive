@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'cognitive.apps.core',
     'cognitive.apps.organization',
     'cognitive.apps.user',
+    'cognitive.apps.transaction',
     'rest_framework',
     'rest_framework_api_key',
     'drf_yasg',

@@ -3,3 +3,6 @@ db.sqlite3
 __pycache__
 .DS_Store
 key
+.venv
+venv
+local.txt

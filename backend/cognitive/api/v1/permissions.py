@@ -18,12 +18,12 @@ class AdminPermissions(BasePermission):
 
 class ManagerPermissions(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role == User.MANAGER
+        return (request.user and request.user.is_authenticated and request.user.role == User.MANAGER)
 
 
 class ClientPermissions(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role == User.CLIENT
+        return (request.user and request.user.is_authenticated and request.user.role == User.CLIENT)
 
 
 class HasOrganizationAPIKey(BaseHasAPIKey):

@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=24, choices=ROLE_CHOICES, default='employee')
     email = models.EmailField(_('email address'), unique=True)
     organization = models.ManyToManyField(
-        Organization, related_name='organization', blank=True)
+        Organization, related_name='users', blank=True)
     created_at = models.DateTimeField(default=tz.now)
 
     USERNAME_FIELD = 'email'

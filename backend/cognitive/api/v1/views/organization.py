@@ -16,6 +16,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_api_key.permissions import HasAPIKey
+from rest_framework import serializers
 
 
 def get_key(key):
@@ -90,9 +91,16 @@ class OrganizationViewSet(ExtendedModelViewSet):
 
     @action(methods=['post'], detail=False, url_path='sign_message')
     def sign_message(self, request):
-        key = request.META["HTTP_X_API_KEY"]
-        api_key = OrganizationAPIKey.objects.get_from_key(key)
-        organization = Organization.objects.get(api_keys=api_key)
+
+        try:
+            key = request.META["HTTP_X_API_KEY"]
+        except Exception:
+            return serializers.ValidationError()
+        try:
+            api_key = OrganizationAPIKey.objects.get_from_key(key)
+            organization = Organization.objects.get(api_keys=api_key)
+        except Exception:
+            return serializers.ValidationError()
 
         print(organization.hashed_key)
 

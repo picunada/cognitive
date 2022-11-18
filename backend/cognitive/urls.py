@@ -20,7 +20,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from cognitive.api.v1.views import user, organization
+from cognitive.api.v1.views import user, organization, transaction
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -32,6 +32,8 @@ router = routers.DefaultRouter()
 router.register(r'user', user.UserViewSet, basename='user')
 router.register(r'organization', organization.OrganizationViewSet,
                 basename='organization')
+router.register(r'transaction', transaction.TransactionViewSet,
+                basename='transaction')
 
 schema_view = get_schema_view(
     openapi.Info(
