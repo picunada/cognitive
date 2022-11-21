@@ -3,5 +3,6 @@
 </script>
 
 <template>
+  <Statistic mb-5 />
   <TransactionDashboard />
 </template>

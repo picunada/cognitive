@@ -1,7 +1,7 @@
 import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { Organization } from '~/models/organization'
-import type { Pagination } from '~/models/utils'
+import type { Pagination, Statistic } from '~/models/utils'
 
 const BASE_URL = import.meta.env.VITE_URL
 
@@ -17,6 +17,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   const searchQuery = ref<string>('')
   const totalPages = ref<number>(1)
   const currentPage = ref<number>(1)
+  const statistic = ref<Statistic>({} as Statistic)
 
   const { notify } = useNotification()
 
@@ -40,6 +41,33 @@ export const useOrganizationStore = defineStore('organization', () => {
           })
           organizations.value = organizationArray
           totalPages.value = data.total_pages
+        }
+        else {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+      })
+  }
+
+  const fetchStatistic = async () => {
+    await fetch(`${BASE_URL}/api/v1/statistic/`, {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    })
+      .then(async (response) => {
+        if (response.status === 200) {
+          const data = await response.json() as Statistic
+          statistic.value = data
         }
         else {
           const data = await response.json()
@@ -190,11 +218,13 @@ export const useOrganizationStore = defineStore('organization', () => {
     currentPage,
     searchQuery,
     organizationError,
+    statistic,
     deleteOrganization,
     fetchOrganizations,
     generateKeyForOrganization,
     createOrganization,
     updateOrganization,
+    fetchStatistic
   }
 })
 

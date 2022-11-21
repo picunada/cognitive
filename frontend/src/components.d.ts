@@ -22,6 +22,7 @@ declare module '@vue/runtime-core' {
     README: typeof import('./components/README.md')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Statistic: typeof import('./components/Statistic.vue')['default']
     Table: typeof import('./components/Table.vue')['default']
     TableLoading: typeof import('./components/TableLoading.vue')['default']
     TransactionDashboard: typeof import('./components/TransactionDashboard.vue')['default']

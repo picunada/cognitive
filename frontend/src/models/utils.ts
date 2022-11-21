@@ -11,3 +11,9 @@ export interface Pagination<T> {
 export interface ApiError {
   detail: string
 }
+
+export interface Statistic {
+  organizations: number
+  users: number
+  transactions: number
+}

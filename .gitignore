@@ -14,3 +14,4 @@ backend/media
 /config/.djangoenv
 .env
 .djangoenv
+node_modules
