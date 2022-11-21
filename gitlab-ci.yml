@@ -1,0 +1,60 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
+  CONTAINER_REGISTRY: registry.digitalocean.com
+  BACKEND_RELEASE_IMAGE: $CONTAINER_REGISTRY/lockerbot/aihouse_backend:latest
+  FRONTEND_RELEASE_IMAGE: $CONTAINER_REGISTRY/lockerbot/aihouse_frontend:latest
+
+.build:
+  stage: build
+  only:
+    - master
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker login -u $DIGITALOCEAN_REGISTRY_TOKEN -p $DIGITALOCEAN_REGISTRY_TOKEN $CONTAINER_REGISTRY
+
+.deploy:
+  stage: deploy
+  when: manual
+  script:
+    - chmod og= $ID_RSA
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u $DIGITALOCEAN_REGISTRY_TOKEN -p $DIGITALOCEAN_REGISTRY_TOKEN $CONTAINER_REGISTRY"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker compose stop"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker compose rm -f backend || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker compose rm -f frontend || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker compose pull"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker compose up -d"
+
+test:
+  stage: test
+  script:
+    - echo "tests should be here"
+
+build:backend:
+  extends: .build
+  script:
+    - echo SITE_NAME="AI-House">./.env
+    - echo SITE_URL="license.aihouse.am">>./.env
+    - echo DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY>>./.env
+    - docker build --pull -f ./config/Dockerfile -t $BACKEND_RELEASE_IMAGE .
+    - docker push $BACKEND_RELEASE_IMAGE
+
+build:frontend:
+  extends: .build
+  script:
+    - echo VUE_APP_API_BASE_URL="$API_BASE_URL">./.env
+    - docker build --pull -f ./config/nginx/Dockerfile -t $FRONTEND_RELEASE_IMAGE .
+    - docker push $FRONTEND_RELEASE_IMAGE
+
+deploy:development:
+  extends: .deploy
+  environment:
+    name: development

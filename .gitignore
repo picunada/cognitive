@@ -1,2 +1,16 @@
-node_modules
 data
+.pdm.toml
+key
+.venv
+venv
+local.txt
+.idea
+db.sqlite3
+__pycache__
+.DS_Store
+frontend/node_modules
+backend/static
+backend/media
+/config/.djangoenv
+.env
+.djangoenv
