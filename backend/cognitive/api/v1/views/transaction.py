@@ -30,6 +30,9 @@ class TransactionViewSet(ExtendedModelViewSet):
         queryset = super().get_queryset()
         if AdminPermissions().has_permission(self.request, self):
             return queryset
+        if ManagerPermissions().has_permission(self.request, self) and self.action == 'list':
+            queryset = queryset.filter(
+                organization__users__exact=self.request.user.pk)
         if ClientPermissions().has_permission(self.request, self) and self.action == 'list':
             queryset = queryset.filter(
                 organization__users__exact=self.request.user.pk)

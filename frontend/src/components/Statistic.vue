@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const organizationStore = useOrganizationStore()
+const auth = useAuthStore()
 
 onMounted(() => {
-  organizationStore.fetchStatistic()
+  if (auth.user?.role === "administrator")
+    organizationStore.fetchStatistic()
 })
 </script>
 
