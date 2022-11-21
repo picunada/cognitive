@@ -11,7 +11,7 @@ class Statistic(APIView):
     permission_classes = [AdminPermissions]
 
     def get(self, request):
-        organizations = Organization.objects.count()
+        organizations = Organization.objects.non_deleted().count()
         users = User.objects.count()
         transactions = Transaction.objects.count()
         data = {
