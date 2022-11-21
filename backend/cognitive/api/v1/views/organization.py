@@ -7,7 +7,7 @@ from rest_framework import filters, permissions
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework import serializers
+from rest_framework import serializers, status
 
 from cognitive.api.v1.permissions import (
     AdminPermissions,
@@ -89,6 +89,14 @@ class OrganizationViewSet(ExtendedModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # check organization balance and status
+        if organization.status == 'blocked':
+            error = {'errors': {'balance': 'organization is blocked'}}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        if organization.balance == 0:
+            error = {'errors': {'balance': 'low balance'}}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
         # sign message
         sign_key = get_key(organization.hashed_key)
         message_bytes = base64.b64decode(serializer['message'].value)
@@ -96,7 +104,12 @@ class OrganizationViewSet(ExtendedModelViewSet):
             message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
         signed_message = base64.b64encode(signature).decode()
 
-        # create transaction
+        # create transaction and update balance
         Transaction.objects.create(organization=organization)
+        organization.balance -= 1
+        organization.save()
 
-        return Response({'status': 'ok', 'message': signed_message})
+        # prepare response data
+        response_data = {'message': signed_message}
+
+        return Response(response_data, status=status.HTTP_200_OK)
