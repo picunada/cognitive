@@ -40,6 +40,7 @@ test:
 
 build:backend:
   extends: .build
+  when: manual
   script:
     - echo SITE_NAME="AI-House">./.env
     - echo SITE_URL="license.aihouse.am">>./.env
@@ -49,6 +50,7 @@ build:backend:
 
 build:frontend:
   extends: .build
+  when: manual
   script:
     - echo VUE_APP_API_BASE_URL="$API_BASE_URL">./.env
     - docker build --pull -f ./config/nginx/Dockerfile -t $FRONTEND_RELEASE_IMAGE .
