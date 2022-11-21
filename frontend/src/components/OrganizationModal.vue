@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Organization } from '~/models/organization'
+import { Organization, Status } from '~/models/organization'
 
 const props = defineProps<{
   organization: Organization
@@ -9,6 +9,8 @@ const props = defineProps<{
 const organizationStore = useOrganizationStore()
 const org = ref(props.organization)
 const emit = defineEmits(['close', 'update:rsakey', 'update-organization'])
+
+const statuses = Object.values(Status) as [string]
 
 const isEditing = ref<boolean>(false)
 </script>
@@ -67,11 +69,23 @@ const isEditing = ref<boolean>(false)
               </p>
             </div>
           </div>
+          <div flex flex-col mt2>
+            <p text-13px mb1 ml2 opacity-40>
+              Status
+            </p>
+            <ComboBox v-if="isEditing" v-model:value="org.status" :iterable="statuses" />
+            <div v-else p4 bg-neutral-200 dark:bg-dark rounded-2>
+              <p break-all>
+                {{ props.organization.status }}
+              </p>
+            </div>
+          </div>
           <div flex justify-between mt4>
             <button btn text-lg @click="organizationStore.generateKeyForOrganization(props.organization.id)">
               Generate new api-key
             </button>
-            <button v-if="isEditing" btn text-lg hover:bg-green @click="emit('update-organization', org.id, org)">
+            <button v-if="isEditing" btn text-lg hover:bg-green
+              @click="emit('update-organization', org.id, org), emit('close')">
               Submit
             </button>
           </div>

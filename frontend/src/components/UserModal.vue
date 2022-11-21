@@ -78,7 +78,8 @@ const isEditing = ref<boolean>(false)
             </div>
           </div>
           <div v-auto-animate flex justify-between mt4 h-8>
-            <button v-if="isEditing" btn text-lg hover:bg-green @click="emit('update-user', user.id, user)">
+            <button v-if="isEditing" btn text-lg hover:bg-green
+              @click="emit('update-user', user.id, user), emit('close')">
               Submit
             </button>
           </div>

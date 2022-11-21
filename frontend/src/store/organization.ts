@@ -85,7 +85,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       })
   }
 
-  const generateKeyForOrganization = async (id: string) => {
+  const generateKeyForOrganization = async (id: number) => {
     await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key/`, {
       method: 'GET',
       headers: {
@@ -150,7 +150,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         'accept': 'application/json',
       },
     }).then(async (response) => {
-      if (response.status !== 200) {
+      if (response.status !== 204) {
         const data = await response.json()
         let errorText = ''
         Object.entries(data).forEach((entry) => {
