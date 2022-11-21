@@ -1,13 +1,5 @@
 import base64
 
-from cognitive.api.v1.permissions import (AdminPermissions,
-                                          HasOrganizationAPIKey,
-                                          ManagerPermissions)
-from cognitive.api.v1.serializers.organization import (
-    OrganizationCreateUpdateSerializer, OrganizationListSerializer,
-    SignMessageSerializer)
-from cognitive.api.v1.viewsets import ExtendedModelViewSet
-from cognitive.apps.organization.models import Organization, OrganizationAPIKey
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, utils
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,14 +7,28 @@ from rest_framework import filters, permissions
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework_api_key.permissions import HasAPIKey
 from rest_framework import serializers
+
+from cognitive.api.v1.permissions import (
+    AdminPermissions,
+    ClientPermissions,
+    HasOrganizationAPIKey,
+    ManagerPermissions
+)
+from cognitive.api.v1.serializers.organization import (
+    OrganizationCreateUpdateSerializer,
+    OrganizationListSerializer,
+    SignMessageSerializer
+)
+from cognitive.api.v1.viewsets import ExtendedModelViewSet
+from cognitive.apps.organization.models import Organization, OrganizationAPIKey
+from cognitive.apps.transaction.models import Transaction
 
 
 def get_key(key):
-    open("key", "w").write(key)
-    with open('key', 'rb') as keyfile:
-        key = serialization.load_pem_private_key(keyfile.read(), password=None)
+    key = key[:31] + '\n' + key[31:]
+    key = key[:-29] + '\n' + key[-29:]
+    key = serialization.load_pem_private_key(str.encode(key), password=None)
     return key
 
 
@@ -41,20 +47,16 @@ class OrganizationViewSet(ExtendedModelViewSet):
         'create': OrganizationCreateUpdateSerializer,
         'update': OrganizationCreateUpdateSerializer,
         'partial_update': OrganizationCreateUpdateSerializer,
-        'block': OrganizationCreateUpdateSerializer,
-        'unblock': OrganizationCreateUpdateSerializer,
         'sign_message': SignMessageSerializer
     }
 
     permission_map = {
-        'list': permissions.AllowAny,
-        'create': permissions.AllowAny,
-        'destroy': permissions.AllowAny,
-        'update': permissions.AllowAny,
-        'partial_update': permissions.AllowAny,
-        'get_new_key': permissions.AllowAny,
-        'block': permissions.AllowAny,
-        'unblock': permissions.AllowAny,
+        'list': (AdminPermissions | ManagerPermissions | ClientPermissions),
+        'create': AdminPermissions,
+        'destroy': AdminPermissions,
+        'update': AdminPermissions,
+        'partial_update': AdminPermissions,
+        'get_new_key': (AdminPermissions | ManagerPermissions | ClientPermissions),
         'sign_message': HasOrganizationAPIKey
     }
 
@@ -71,24 +73,6 @@ class OrganizationViewSet(ExtendedModelViewSet):
 
         return Response(key)
 
-    @action(methods=['get'], detail=True, url_path='block')
-    def block(self, request, pk):
-        organization = get_object_or_404(Organization, pk=pk)
-        organization.status = "blocked"
-        organization.save()
-
-        serializer = self.get_serializer(instance=organization)
-        return Response(serializer.data)
-
-    @action(methods=['get'], detail=True, url_path='unblock')
-    def unblock(self, request, pk):
-        organization = get_object_or_404(Organization, pk=pk)
-        organization.status = "active"
-        organization.save()
-
-        serializer = self.get_serializer(instance=organization)
-        return Response(serializer.data)
-
     @action(methods=['post'], detail=False, url_path='sign_message')
     def sign_message(self, request):
 
@@ -97,20 +81,22 @@ class OrganizationViewSet(ExtendedModelViewSet):
         except Exception:
             return serializers.ValidationError()
         try:
-            api_key = OrganizationAPIKey.objects.get_from_key(key)
-            organization = Organization.objects.get(api_keys=api_key)
+            organization = OrganizationAPIKey.objects.get_from_key(key).organization
         except Exception:
             return serializers.ValidationError()
 
-        print(organization.hashed_key)
+        # serialize and validate payload
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        # sign message
         sign_key = get_key(organization.hashed_key)
-
-        print(request.data['message'])
-
-        message_bytes = base64.b64decode(request.data['message'])
+        message_bytes = base64.b64decode(serializer['message'].value)
         signature = sign_key.sign(
             message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
         signed_message = base64.b64encode(signature).decode()
+
+        # create transaction
+        Transaction.objects.create(organization=organization)
 
         return Response({'status': 'ok', 'message': signed_message})

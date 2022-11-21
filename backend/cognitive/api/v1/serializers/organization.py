@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError
 
 from cognitive.apps.organization.models import Organization, OrganizationAPIKey
 
@@ -8,7 +7,9 @@ User = get_user_model()
 
 
 class OrganizationFullSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer with full data for list Organization model.
+    """
     class Meta:
         fields = ('id', 'name', 'hashed_key',
                   'status', 'balance', 'created_at', 'deleted_at')
@@ -18,7 +19,7 @@ class OrganizationFullSerializer(serializers.ModelSerializer):
 
 class OrganizationListSerializer(serializers.ModelSerializer):
     """
-    Serializer for list Organization model.
+    Serializer with partial data for list Organization model.
     """
 
     class Meta:
@@ -39,14 +40,9 @@ class OrganizationCreateUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'deleted_at')
         model = Organization
 
-    def create(self, data):
-        organization = super().create(data)
-
-        organization.save()
-
-        return organization
-
 
 class SignMessageSerializer(serializers.Serializer):
-
+    """
+    Serializer for message sign.
+    """
     message = serializers.CharField()
