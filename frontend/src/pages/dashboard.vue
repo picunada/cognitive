@@ -3,10 +3,12 @@
 
 <template>
   <div w-full>
-    <h2 title1 mb5>
-      Profile
-    </h2>
-    <UserProfile />
+    <div>
+      <h2 title1 mb5>
+        Dashboard
+      </h2>
+      <UserDashboard />
+    </div>
   </div>
 </template>
 

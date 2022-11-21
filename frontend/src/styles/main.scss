@@ -1,2 +1,23 @@
 @import './markdown.css';
-@import './default.scss'
+@import './default.scss';
+
+
+.my-notification {
+  @apply p3 rounded-md mb5 bg-sky;
+
+  // style for title line
+  .notification-title {
+    @apply caption;
+  }
+
+  // additional styling hook when using`type` parameter, i.e. this.$notify({ type: 'success', message: 'Yay!' })
+  &.success {
+    @apply bg-green;
+  }
+  &.info {
+    @apply bg-sky;
+  }
+  &.error {
+    @apply bg-red;
+  }
+};

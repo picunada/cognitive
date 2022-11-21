@@ -59,7 +59,7 @@ function openModal() {
               <DialogTitle as="h3" title2 mb3>
                 Create organization
               </DialogTitle>
-              <form @submit="organizationStore.createOrganization(organization), closeModal()">
+              <form @submit.prevent="organizationStore.createOrganization(organization), closeModal()">
                 <div mb3 flex flex-col gap2>
                   <div>
                     <p text-13px mb1 ml2 opacity-40>

@@ -1,6 +1,7 @@
+import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { Organization } from '~/models/organization'
-import type { Pagination } from '~/models/pagination'
+import type { ApiError, Pagination } from '~/models/utils'
 
 const BASE_URL = import.meta.env.VITE_URL
 
@@ -16,47 +17,72 @@ export const useOrganizationStore = defineStore('organization', () => {
   const searchQuery = ref<string>('')
   const totalPages = ref<number>(1)
   const currentPage = ref<number>(1)
+  const generatedKey = ref<string>()
 
-  const organizationError = ref<String>()
+  const { notify } = useNotification()
 
-  const fetchOrganizations = async (page: number, searchQuery?: string) => {
-    let response: any
-    if (searchQuery) {
-      response = await fetch(`${BASE_URL}/api/v1/organization/?search=${searchQuery}&page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-    }
-    else {
-      response = await fetch(`${BASE_URL}/api/v1/organization/?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-    }
+  const organizationError = ref<string>()
 
-    const data = await response.json() as Pagination<Organization>
-    let organizationArray = data.results as Organization[]
-    organizationArray = organizationArray.map((organization) => {
-      organization.created_at = new Date(organization.created_at)
-      if (organization.deleted_at)
-        organization.deleted_at = new Date(organization.deleted_at)
-      return organization
+  const fetchOrganizations = async (options: { page: number; searchQuery?: string }) => {
+    await fetch(`${BASE_URL}/api/v1/organization/?search=${options.searchQuery ? options.searchQuery : ''}&page=${options.page}`, {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
     })
-    organizations.value = organizationArray
-    totalPages.value = data.total_pages
+      .then(async (response) => {
+        if (response.status === 200) {
+          const data = await response.json() as Pagination<Organization>
+          let organizationArray = data.results as Organization[]
+          organizationArray = organizationArray.map((organization) => {
+            organization.created_at = new Date(organization.created_at)
+            if (organization.deleted_at)
+              organization.deleted_at = new Date(organization.deleted_at)
+            return organization
+          })
+          organizations.value = organizationArray
+          totalPages.value = data.total_pages
+        }
+        else {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+      })
   }
 
   const generateKeyForOrganization = async (id: string) => {
-    const response = await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key`, {
+    await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
         accept: 'application/json',
       },
-    })
-    return await response.json()
+    }).then(async (response) => {
+      if (response.status !== 200) {
+        const data = await response.json()
+        let errorText = ''
+        Object.entries(data).forEach((entry) => {
+          const [k, v] = entry
+          errorText += `${k}: ${v} \n`
+        })
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: errorText,
+        })
+      }
+      else {
+        generatedKey.value = await response.json()
+      }
+    }).catch(err => organizationError.value = err)
   }
 
   const createOrganization = async (organization: Organization) => {
@@ -68,8 +94,23 @@ export const useOrganizationStore = defineStore('organization', () => {
         'accept': 'application/json',
       },
       body: JSON.stringify(organization),
-    }).then(async () => {
-      await fetchOrganizations(currentPage.value)
+    }).then(async (response) => {
+      if (response.status !== 200) {
+        const data = await response.json()
+        let errorText = ''
+        Object.entries(data).forEach((entry) => {
+          const [k, v] = entry
+          errorText += `${k}: ${v} \n`
+        })
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: errorText,
+        })
+      }
+      else {
+        await fetchOrganizations({ page: currentPage.value })
+      }
     }).catch(error => organizationError.value = error)
   }
 
@@ -81,7 +122,24 @@ export const useOrganizationStore = defineStore('organization', () => {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
-    }).then(async () => await fetchOrganizations(currentPage.value))
+    }).then(async (response) => {
+      if (response.status !== 200) {
+        const data = await response.json()
+        let errorText = ''
+        Object.entries(data).forEach((entry) => {
+          const [k, v] = entry
+          errorText += `${k}: ${v} \n`
+        })
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: errorText,
+        })
+      }
+      else {
+        await fetchOrganizations({ page: currentPage.value })
+      }
+    }).catch(err => organizationError.value = err)
   }
 
   const updateOrganization = async (id: number, organization: Organization) => {
@@ -93,19 +151,38 @@ export const useOrganizationStore = defineStore('organization', () => {
         'accept': 'application/json',
       },
       body: JSON.stringify(organization),
-    }).then(async () => await fetchOrganizations(currentPage.value))
+    })
+      .then(async (response) => {
+        if (response.status !== 200) {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+        else {
+          await fetchOrganizations({ page: currentPage.value })
+        }
+      })
+      .catch(err => organizationError.value = err)
   }
 
   watch(currentPage, async (newV) => {
-    await fetchOrganizations(newV)
+    await fetchOrganizations({ page: newV })
   })
 
   watchDebounced(searchQuery, async (newV) => {
     currentPage.value = 1
     if (newV.length > 0)
-      await fetchOrganizations(currentPage.value, newV)
+      await fetchOrganizations({ page: currentPage.value, searchQuery: newV })
     else
-      fetchOrganizations(currentPage.value)
+      await fetchOrganizations({ page: currentPage.value })
   }, { debounce: 300, maxWait: 2000 })
 
   return {

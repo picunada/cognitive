@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { User } from '~/models/user'
+import { Roles } from '~/models/user'
 
 const userStore = useUsersStore()
 const organizationStore = useOrganizationStore()
 
 const selectedUser: Ref<User | undefined> = ref()
 const filteredOrganization = ref<string>()
-// const organizations: ComputedRef<string[] | undefined> = computed(() => organizationStore.organizations?.map(x => x.name))
+const filteredRole = ref<string>()
+
+const organizations: ComputedRef<string[] | undefined> = computed(() => organizationStore.organizations?.map(x => x.name))
+const roles = Object.values(Roles) as [string]
 
 const toggleModal = (organization: User | undefined) => {
   if (!selectedUser.value)
@@ -18,19 +22,31 @@ const toggleModal = (organization: User | undefined) => {
 
 onMounted(async () => {
   await userStore.fetchUsers({ page: userStore.currentPage })
-  await organizationStore.fetchOrganizations(organizationStore.currentPage)
+  await organizationStore.fetchOrganizations({ page: organizationStore.currentPage })
 })
 
 watch(filteredOrganization, async (newV) => {
-  await userStore.fetchUsers({ page: userStore.currentPage, filterQuery: newV })
+  await userStore.fetchUsers({ page: userStore.currentPage, organizationName: newV })
+})
+
+watch(filteredRole, async (newV) => {
+  await userStore.fetchUsers({ page: userStore.currentPage, role: newV })
 })
 </script>
 
 <template>
-  <div mb5 flex justify-between items-center>
-    <div flex gap4 items-center>
-      <input v-model="userStore.searchQuery" animation text-field type="text" placeholder="Search ...">
-      <!-- <ComboBox v-if="organizations" v-model:value="filteredOrganization" :iterable="organizations as [string]" /> -->
+  <div mb5 mt5 flex justify-between items-center>
+    <div flex gap3 items-center>
+      <div relative>
+        <div absolute z-10 bottom-11 left-4 opacity-50>
+          Search
+        </div>
+        <input v-model="userStore.searchQuery" animation text-field type="text" placeholder="Search ...">
+      </div>
+
+      <ComboBox v-if="organizations" v-model:value="filteredOrganization" :iterable="organizations as [string]"
+        header="Organization Name" />
+      <ComboBox v-if="organizations" v-model:value="filteredRole" :iterable="roles as [string]" header="Role" />
     </div>
 
     <Pagination v-model:current-page="userStore.currentPage" :total="userStore.totalPages" />

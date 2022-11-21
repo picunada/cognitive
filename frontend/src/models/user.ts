@@ -1,8 +1,11 @@
+import type { Organization } from './organization'
+
 export interface User {
   id: number
   email: string
   first_name: string
   last_name: string
+  organization: Organization
   role: string
   created_at: Date
 }

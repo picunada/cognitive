@@ -11,6 +11,7 @@ import {
 const props = defineProps<{
   iterable: [string]
   value: any
+  header?: string
 }>()
 
 const emit = defineEmits(['update:value'])
@@ -32,7 +33,7 @@ watch(selectedItem, (newV) => {
 })
 
 onMounted(() => {
-  selectedItem.value = props.iterable[0]
+  selectedItem.value = ''
 })
 </script>
 
@@ -40,6 +41,9 @@ onMounted(() => {
   <div>
     <Combobox v-model="selectedItem">
       <div class="relative">
+        <div absolute z-10 bottom-11 left-4 opacity-50>
+          {{ props.header }}
+        </div>
         <div class="group relative w-full px3 text-field p0">
           <div i-ph:magnifying-glass />
           <ComboboxInput class="text-field p2 w-full" :display-value="(item) => item as string"
@@ -56,6 +60,21 @@ onMounted(() => {
               class="relative cursor-default select-none py-2 px-4">
               Nothing found.
             </div>
+
+            <ComboboxOption v-slot="{ selected, active }" as="template" value="">
+              <li class="relative cursor-default select-none py-2 pl-10 pr-4" :class="{
+                'bg-sky text-white': active,
+                'text-gray-900 dark:text-white': !active,
+              }">
+                <span class="animation block truncate" :class="{ 'font-medium': selected, 'font-normal': !selected }">
+                  {{ 'None' }}
+                </span>
+                <span v-if="selected" class="animation absolute inset-y-0 left-0 flex items-center pl-3 "
+                  :class="{ 'text-white': active, 'text-sky': !active }">
+                  <div i-ph:check class="h-5 w-5" aria-hidden="true" />
+                </span>
+              </li>
+            </ComboboxOption>
 
             <ComboboxOption v-for="item in filteredItems.slice(0, 10)" :key="item" v-slot="{ selected, active }"
               as="template" :value="item">

@@ -6,13 +6,16 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
+import type { ComputedRef } from 'vue'
 import type { UserCreate } from '~/models/user'
 import { Roles } from '~/models/user'
 
 const userStore = useUsersStore()
+const organizationStore = useOrganizationStore()
 
 const isOpen = ref<boolean>(false)
 const user = ref<UserCreate>({} as UserCreate)
+const organizations: ComputedRef<string[] | undefined> = computed(() => organizationStore.organizations?.map(x => x.name))
 
 const roles = Object.values(Roles) as [string]
 
@@ -83,6 +86,12 @@ function openModal() {
                       Role
                     </p>
                     <ComboBox v-model:value="user.role" :iterable="roles" />
+                  </div>
+                  <div>
+                    <p text-13px mb1 ml2 opacity-40>
+                      Organization
+                    </p>
+                    <ComboBox v-model:value="user.organization" :iterable="organizations as [string]" />
                   </div>
                   <div>
                     <p text-13px mb1 ml2 opacity-40>
