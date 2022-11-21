@@ -2,7 +2,6 @@ from django.db import models
 from cognitive.apps.core.models import CreatedDeletedModel
 from rest_framework_api_key.models import AbstractAPIKey, BaseAPIKeyManager
 from rest_framework_api_key.crypto import KeyGenerator
-# Create your models here.
 
 
 class Organization(CreatedDeletedModel):
@@ -17,7 +16,7 @@ class Organization(CreatedDeletedModel):
         choices=Status.choices,
         default=Status.ACTIVE,
     )
-    balance = models.PositiveSmallIntegerField()
+    balance = models.PositiveSmallIntegerField(default=0)
 
 
 class OrganizationAPIKeyManager(BaseAPIKeyManager):
