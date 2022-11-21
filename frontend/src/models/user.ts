@@ -1,16 +1,21 @@
-import type { Organization } from './organization'
+import { Organization } from "./organization"
+
 
 export interface User {
   id: number
   email: string
   first_name: string
   last_name: string
-  organization: Organization
   role: string
   created_at: Date
 }
 
+export interface UserRetrieve extends User {
+  organization: [Organization]
+}
+
 export interface UserCreate extends User {
+  organization: [number]
   password: string
   confirm_password: string
 }

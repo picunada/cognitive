@@ -1,3 +1,4 @@
+import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { ComputedRef } from 'vue'
 import type { User } from '~/models/user'
@@ -23,6 +24,8 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User>()
   const authError = ref<string>()
 
+  const { notify } = useNotification()
+
   const isAuthenticated: ComputedRef<boolean> = computed(() => accessToken.value !== '' && accessToken.value !== undefined)
 
   const login = async (credentials: LoginData) => {
@@ -47,11 +50,29 @@ export const useAuthStore = defineStore('auth', () => {
         Accept: 'application/json',
       },
     }).then(async (response) => {
-      if (response.status === 200) {
+      if (response.status !== 200 && response.status !== 201) {
+        const data = await response.json()
+        let errorText = ''
+        Object.entries(data).forEach((entry) => {
+          const [k, v] = entry
+          errorText += `${k}: ${v} \n`
+        })
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: errorText,
+        })
+      }
+      else {
         const data = await response.json() as User
         user.value = data
-      }
-    }).catch(error => authError.value = error)
+    }}).catch((error) => {
+      notify({
+        title: 'Error',
+        type: 'error',
+        text: error,
+      })
+    })
   }
 
   const logout = async () => {

@@ -41,7 +41,7 @@ onMounted(async () => {
                 }}
               </div>
               <div md:text-17px lg:text-20px>
-                {{ `Count: ${organization.count ?? 0}` }}
+                {{ `Balance: ${organization.balance ?? 0}` }}
               </div>
             </div>
           </div>
@@ -57,8 +57,7 @@ onMounted(async () => {
       leave-from-class="transform scale-100 opacity-100" leave-to-class="transform scale-95 opacity-0">
       <template v-if="selectedOrganization">
         <OrganizationModal v-model:organization="selectedOrganization" v-model:rsakey="selectedOrganization.hashed_key"
-          @update-organization="organizationStore.updateOrganization(selectedOrganization?.id, selectedOrganization)"
-          @close="toggleModal(selectedOrganization)" />
+          @update-organization="organizationStore.updateOrganization" @close="toggleModal(selectedOrganization)" />
       </template>
     </transition>
   </div>

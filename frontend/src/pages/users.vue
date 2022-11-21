@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
   Dialog,
   DialogPanel,
   DialogTitle,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import type { ComputedRef } from 'vue'
+
 import type { UserCreate } from '~/models/user'
 import { Roles } from '~/models/user'
 
@@ -14,8 +19,24 @@ const userStore = useUsersStore()
 const organizationStore = useOrganizationStore()
 
 const isOpen = ref<boolean>(false)
-const user = ref<UserCreate>({} as UserCreate)
-const organizations: ComputedRef<string[] | undefined> = computed(() => organizationStore.organizations?.map(x => x.name))
+const user = ref<UserCreate>({
+  first_name: '',
+  last_name: '',
+  password: '',
+  confirm_password: '',
+  organization: [] as number[]
+} as UserCreate)
+
+const selectedOrganization = ref()
+const query = ref('')
+
+const filteredItems = computed(() =>
+  query.value === ''
+    ? organizationStore.organizations
+    : organizationStore.organizations?.filter((org) => {
+      return org.name.toLowerCase().includes(query.value.toLowerCase())
+    }),
+)
 
 const roles = Object.values(Roles) as [string]
 
@@ -25,6 +46,12 @@ function closeModal() {
 function openModal() {
   isOpen.value = true
 }
+
+watch(selectedOrganization, (newV) => {
+  if (user.value.organization.length > 0)
+    user.value.organization.pop()
+  user.value.organization.push()
+})
 </script>
 
 <template>
@@ -77,12 +104,6 @@ function openModal() {
                   </div>
                   <div>
                     <p text-13px mb1 ml2 opacity-40>
-                      Email
-                    </p>
-                    <input v-model="user.email" animation text-field w-full type="text">
-                  </div>
-                  <div>
-                    <p text-13px mb1 ml2 opacity-40>
                       Role
                     </p>
                     <ComboBox v-model:value="user.role" :iterable="roles" />
@@ -91,7 +112,68 @@ function openModal() {
                     <p text-13px mb1 ml2 opacity-40>
                       Organization
                     </p>
-                    <ComboBox v-model:value="user.organization" :iterable="organizations as [string]" />
+                    <Combobox v-model="user.organization" multiple>
+                      <div class="relative">
+                        <div class="group relative w-full px3 text-field p0">
+                          <div i-ph:magnifying-glass />
+                          <ComboboxInput class="text-field p2 w-full" :display-value="(item: any) => item as string"
+                            @change="query = $event.target.value" />
+                          <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
+                            <div i-ph:caret-down-light />
+                          </ComboboxButton>
+                        </div>
+                        <TransitionRoot leave="transition ease-in duration-100" leave-from="opacity-100"
+                          leave-to="opacity-0" @after-leave="query = ''">
+                          <ComboboxOptions
+                            class="absolute z-100 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-dark4 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            <div v-if="filteredItems?.length === 0 && query !== ''"
+                              class="relative cursor-default select-none py-2 px-4">
+                              Nothing found.
+                            </div>
+
+                            <ComboboxOption v-slot="{ selected, active }" as="template" value="">
+                              <li class="relative cursor-default select-none py-2 pl-10 pr-4" :class="{
+                                'bg-sky text-white': active,
+                                'text-gray-900 dark:text-white': !active,
+                              }">
+                                <span class="animation block truncate"
+                                  :class="{ 'font-medium': selected, 'font-normal': !selected }">
+                                  {{ 'None' }}
+                                </span>
+                                <span v-if="selected"
+                                  class="animation absolute inset-y-0 left-0 flex items-center pl-3 "
+                                  :class="{ 'text-white': active, 'text-sky': !active }">
+                                  <div i-ph:check class="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              </li>
+                            </ComboboxOption>
+
+                            <ComboboxOption v-for="item in filteredItems?.slice(0, 10)" :key="item.id"
+                              v-slot="{ selected, active }" as="template" :value="item.id">
+                              <li class="relative cursor-default select-none py-2 pl-10 pr-4" :class="{
+                                'bg-sky text-white': active,
+                                'text-gray-900 dark:text-white': !active,
+                              }">
+                                <span class="animation block truncate"
+                                  :class="{ 'font-medium': selected, 'font-normal': !selected }">
+                                  {{ item.name }}
+                                </span>
+                                <span v-if="selected" class="animation absolute inset-y-0 left-0 flex items-center pl-3"
+                                  :class="{ 'text-white': active, 'text-sky': !active }">
+                                  <div i-ph:check class="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              </li>
+                            </ComboboxOption>
+                          </ComboboxOptions>
+                        </TransitionRoot>
+                      </div>
+                    </Combobox>
+                  </div>
+                  <div>
+                    <p text-13px mb1 ml2 opacity-40>
+                      Email
+                    </p>
+                    <input v-model="user.email" animation text-field w-full type="text">
                   </div>
                   <div>
                     <p text-13px mb1 ml2 opacity-40>

@@ -1,7 +1,7 @@
 import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { Pagination } from '~/models/utils'
-import type { User } from '~/models/user'
+import type { User, UserRetrieve } from '~/models/user'
 
 const BASE_URL = import.meta.env.VITE_URL
 
@@ -70,7 +70,7 @@ export const useUsersStore = defineStore('users', () => {
       },
       body: JSON.stringify(user),
     }).then(async (response) => {
-      if (response.status !== 200) {
+      if (response.status !== 200 && response.status !== 201) {
         const data = await response.json()
         let errorText = ''
         Object.entries(data).forEach((entry) => {
@@ -134,6 +134,7 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   const updateUser = async (id: number, user: User) => {
+    user.organization = user.organization.map((org) => org.id)
     await fetch(`${BASE_URL}/api/v1/user/${id}/`, {
       method: 'PATCH',
       headers: {

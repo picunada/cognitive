@@ -1,7 +1,7 @@
 import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { Organization } from '~/models/organization'
-import type { ApiError, Pagination } from '~/models/utils'
+import type { Pagination } from '~/models/utils'
 
 const BASE_URL = import.meta.env.VITE_URL
 
@@ -17,7 +17,6 @@ export const useOrganizationStore = defineStore('organization', () => {
   const searchQuery = ref<string>('')
   const totalPages = ref<number>(1)
   const currentPage = ref<number>(1)
-  const generatedKey = ref<string>()
 
   const { notify } = useNotification()
 
@@ -59,7 +58,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   const generateKeyForOrganization = async (id: string) => {
-    await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key`, {
+    await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key/`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
@@ -80,7 +79,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         })
       }
       else {
-        generatedKey.value = await response.json()
+        alert(`New key: ${await response.json()}`)
       }
     }).catch(err => organizationError.value = err)
   }
@@ -95,7 +94,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       },
       body: JSON.stringify(organization),
     }).then(async (response) => {
-      if (response.status !== 200) {
+      if (response.status !== 200 && response.status !== 201) {
         const data = await response.json()
         let errorText = ''
         Object.entries(data).forEach((entry) => {

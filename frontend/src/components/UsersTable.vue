@@ -80,7 +80,7 @@ watch(filteredRole, async (newV) => {
       enter-to-class="transform scale-100 opacity-100" leave-active-class="transition duration-75 ease-in"
       leave-from-class="transform scale-100 opacity-100" leave-to-class="transform scale-95 opacity-0">
       <template v-if="selectedUser">
-        <UserModal v-model:user="selectedUser" @close="toggleModal(selectedUser)" />
+        <UserModal v-model:user="selectedUser" @close="toggleModal(selectedUser)" @update-user="userStore.updateUser" />
       </template>
     </transition>
   </div>

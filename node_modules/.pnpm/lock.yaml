@@ -1,0 +1,15 @@
+lockfileVersion: 5.4
+
+specifiers:
+  '@kyvg/vue3-notification': ^2.6.1
+
+dependencies:
+  '@kyvg/vue3-notification': 2.6.1
+
+packages:
+
+  /@kyvg/vue3-notification/2.6.1:
+    resolution: {integrity: sha512-f3QHfuU1wsw14l9pbToNvC8AL5d5e0Wiy88SbK9f4g1h4ajQpooNmf+4RKttxpSvWknycMVUVHlNGavRQ+kGag==}
+    peerDependencies:
+      vue: ^3.0.0
+    dev: false
