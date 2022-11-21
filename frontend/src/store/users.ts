@@ -1,5 +1,6 @@
+import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import type { Pagination } from '~/models/pagination'
+import type { Pagination } from '~/models/utils'
 import type { User } from '~/models/user'
 
 const BASE_URL = import.meta.env.VITE_URL
@@ -16,40 +17,47 @@ export const useUsersStore = defineStore('users', () => {
   const totalPages = ref<number>(1)
   const currentPage = ref<number>(1)
 
-  const userError = ref<String>()
+  const userError = ref<string>()
 
-  const fetchUsers = async (options: { page: number; searchQuery?: string; filterQuery?: string }) => {
-    let response: any
-    if (searchQuery) {
-      response = await fetch(`${BASE_URL}/api/v1/user/?search=${options.searchQuery}&page=${options.page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-    }
-    else if (options.filterQuery) {
-      response = await fetch(`${BASE_URL}/api/v1/user/??organization__name=${options.filterQuery}&page=${options.page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-    }
-    else {
-      response = await fetch(`${BASE_URL}/api/v1/user/?page=${options.page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-    }
+  const { notify } = useNotification()
 
-    const data = await response.json() as Pagination<User>
-    let userArray = data.results as User[]
-    userArray = userArray.map((user) => {
-      user.created_at = new Date(user.created_at)
-      return user
+  const fetchUsers = async (options: { page: number; searchQuery?: string; role?: string; organizationId?: string; organizationName?: string; orderingField?: string }) => {
+    await fetch(`${BASE_URL}/api/v1/user/?role=${options.role ? options.role : ''}&organization__name=${options.organizationName ? options.organizationName : ''}&${options.organizationId ? `organization=${options.organizationId}` : ''}&ordering=${options.orderingField ? options.orderingField : ''}&search=${options.searchQuery ? options.searchQuery : ''}&page=${options.page ? options.page : ''}`, {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        const data = await response.json() as Pagination<User>
+        let userArray = data.results as User[]
+        userArray = userArray.map((user) => {
+          user.created_at = new Date(user.created_at)
+          return user
+        })
+        users.value = userArray
+        totalPages.value = data.total_pages
+      }
+      else {
+        const data = await response.json()
+        let errorText = ''
+        Object.entries(data).forEach((entry) => {
+          const [k, v] = entry
+          errorText += `${k}: ${v} \n`
+        })
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: errorText,
+        })
+      }
+    }).catch((error) => {
+      userError.value = error
+      notify({
+        title: 'Error',
+        type: 'error',
+        text: error,
+      })
     })
-    users.value = userArray
-    totalPages.value = data.total_pages
   }
 
   const createUser = async (user: User) => {
@@ -61,9 +69,31 @@ export const useUsersStore = defineStore('users', () => {
         'accept': 'application/json',
       },
       body: JSON.stringify(user),
-    }).then(async () => {
-      await fetchUsers({ page: currentPage.value })
-    }).catch(error => userError.value = error)
+    }).then(async (response) => {
+      if (response.status !== 200) {
+        const data = await response.json()
+        let errorText = ''
+        Object.entries(data).forEach((entry) => {
+          const [k, v] = entry
+          errorText += `${k}: ${v} \n`
+        })
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: errorText,
+        })
+      }
+      else {
+        await fetchUsers({ page: currentPage.value })
+      }
+    }).catch((error) => {
+      userError.value = error
+      notify({
+        title: 'Error',
+        type: 'error',
+        text: error,
+      })
+    })
   }
 
   const deleteUser = async (id: number) => {
@@ -74,7 +104,33 @@ export const useUsersStore = defineStore('users', () => {
         'Content-Type': 'application/json',
         'accept': 'application/json',
       },
-    }).then(async () => await fetchUsers({ page: currentPage.value }))
+    })
+      .then(async (response) => {
+        if (response.status !== 200) {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+        else {
+          await fetchUsers({ page: currentPage.value })
+        }
+      })
+      .catch((err) => {
+        userError.value = err
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: err,
+        })
+      })
   }
 
   const updateUser = async (id: number, user: User) => {
@@ -86,7 +142,33 @@ export const useUsersStore = defineStore('users', () => {
         'accept': 'application/json',
       },
       body: JSON.stringify(user),
-    }).then(async () => await fetchUsers({ page: currentPage.value }))
+    })
+      .then(async (response) => {
+        if (response.status !== 200) {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+        else {
+          await fetchUsers({ page: currentPage.value })
+        }
+      })
+      .catch((err) => {
+        userError.value = err
+        notify({
+          title: 'Error',
+          type: 'error',
+          text: err,
+        })
+      })
   }
 
   watch(currentPage, async (newV) => {

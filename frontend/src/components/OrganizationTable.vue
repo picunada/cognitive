@@ -14,7 +14,7 @@ const toggleModal = (organization: Organization | undefined) => {
 }
 
 onMounted(async () => {
-  await organizationStore.fetchOrganizations(organizationStore.currentPage)
+  await organizationStore.fetchOrganizations({ page: organizationStore.currentPage })
 })
 </script>
 

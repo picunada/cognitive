@@ -10,7 +10,7 @@ onMounted(async () => {
   <main h-screen w-screen flex flex-col items-center text-gray-700 dark:text-gray-200>
     <Header />
     <div flex flex-1 w-full max-w-1390px>
-      <Menu v-if="auth.isAuthenticated" />
+      <Menu v-if="auth.isAuthenticated && auth.user?.role === 'administrator'" />
       <div px2 pt5 w-full>
         <RouterView />
       </div>

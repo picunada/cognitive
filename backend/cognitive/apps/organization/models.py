@@ -17,7 +17,7 @@ class Organization(CreatedDeletedModel):
         choices=Status.choices,
         default=Status.ACTIVE,
     )
-    count = models.IntegerField()
+    balance = models.PositiveSmallIntegerField()
 
 
 class OrganizationAPIKeyManager(BaseAPIKeyManager):

@@ -11,7 +11,7 @@ class OrganizationFullSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'name', 'hashed_key',
-                  'status', 'created_at', 'deleted_at')
+                  'status', 'balance', 'created_at', 'deleted_at')
         read_only_fields = ('id', 'created_at')
         model = Organization
 

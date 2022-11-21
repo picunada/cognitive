@@ -7,3 +7,7 @@ export interface Pagination<T> {
   total_pages: number
   results: T[]
 }
+
+export interface ApiError {
+  detail: string
+}
