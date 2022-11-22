@@ -100,10 +100,10 @@ class OrganizationViewSet(ExtendedModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         # check organization balance and status
-        if organization.status == 'blocked':
+        if organization.status == Organization.Status.BLOCKED:
             error = {'errors': {'balance': 'organization is blocked'}}
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        if organization.balance == 0:
+        if not organization.balance:
             error = {'errors': {'balance': 'low balance'}}
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
 

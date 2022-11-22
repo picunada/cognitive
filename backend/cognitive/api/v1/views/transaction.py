@@ -1,13 +1,13 @@
+from django.contrib.auth import get_user_model
+
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions
+
 from cognitive.api.v1.permissions import ClientPermissions
 from cognitive.api.v1.permissions import AdminPermissions, ManagerPermissions
 from cognitive.api.v1.serializers.transaction import TransactionFullSerializer
 from cognitive.api.v1.viewsets import ExtendedModelViewSet
 from cognitive.apps.transaction.models import Transaction
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -30,10 +30,10 @@ class TransactionViewSet(ExtendedModelViewSet):
         queryset = super().get_queryset()
         if AdminPermissions().has_permission(self.request, self):
             return queryset
-        if ManagerPermissions().has_permission(self.request, self) and self.action == 'list':
+        if ManagerPermissions().has_permission(self.request, self):
             queryset = queryset.filter(
                 organization__users__exact=self.request.user.pk)
-        if ClientPermissions().has_permission(self.request, self) and self.action == 'list':
+        if ClientPermissions().has_permission(self.request, self):
             queryset = queryset.filter(
                 organization__users__exact=self.request.user.pk)
 

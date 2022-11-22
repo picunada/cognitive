@@ -4,7 +4,7 @@ from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from cognitive.api.v1.permissions import AdminPermissions
+from cognitive.api.v1.permissions import AdminPermissions, ManagerPermissions, ClientPermissions
 from cognitive.api.v1.serializers.user import UserCreateUpdateSerializer, UserFullSerializer, \
     PasswordResetSerializer, PasswordResetConfirmSerializer
 from cognitive.api.v1.viewsets import ExtendedModelViewSet
@@ -19,7 +19,7 @@ class UserViewSet(ExtendedModelViewSet):
                        filters.OrderingFilter, filters.SearchFilter]
 
     filterset_fields = ('role', 'organization__name', 'organization')
-    ordering_fields = ('id')
+    ordering_fields = ('id',)
     search_fields = ('first_name', 'last_name')
 
     serializer_class_map = {
@@ -31,15 +31,24 @@ class UserViewSet(ExtendedModelViewSet):
     }
 
     permission_map = {
-        'create': permissions.AllowAny,
-        'list': permissions.AllowAny,
-        'update': (AdminPermissions | permissions.IsAuthenticated),
-        'partial_update': (AdminPermissions | permissions.IsAuthenticated),
-        'destroy': AdminPermissions,
+        'create': (AdminPermissions | ManagerPermissions),
+        'list': (AdminPermissions | ManagerPermissions),
+        'update': (AdminPermissions | ManagerPermissions),
+        'partial_update': (AdminPermissions | ManagerPermissions),
+        'destroy': (AdminPermissions | ManagerPermissions),
         'my': permissions.IsAuthenticated,
         # 'password_reset': permissions.AllowAny,
         # 'password_reset_confirm': permissions.AllowAny
     }
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if AdminPermissions().has_permission(self.request, self):
+            return queryset
+        if ManagerPermissions().has_permission(self.request, self):
+            queryset = queryset.filter(role=User.CLIENT)
+
+        return queryset.distinct()
 
     @action(methods=['get'], filter_backends=[], detail=False)
     def my(self, request):

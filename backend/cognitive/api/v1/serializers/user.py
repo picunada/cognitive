@@ -1,22 +1,19 @@
-from rest_framework.settings import api_settings
-from rest_framework.exceptions import ValidationError
-from rest_framework import serializers, exceptions
+import regex as re
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.models import update_last_login
-from django.contrib.auth import get_user_model
-from django.conf import settings
-import regex as re
+
+from rest_framework.exceptions import ValidationError
+from rest_framework import serializers, exceptions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 
 from cognitive.api.v1.serializers.organization import OrganizationFullSerializer
-from cognitive.apps.organization.models import Organization
 
-
-# from project.apps.user.tasks import send_welcome_message, send_password_reset_email_task
 
 User = get_user_model()
 
@@ -43,30 +40,39 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'organization', 'password', 'confirm_password',
                   'token',)
         read_only_fields = ('id', 'token')
-        extra_kwargs = {'password': {'write_only': True},
-                        'rsa_key': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True}, 'rsa_key': {'write_only': True}}
 
     @staticmethod
     def get_token(user):
         # Create JWT token for new user
-
         token = RefreshToken.for_user(user)
 
         return {'refresh': str(token),
                 'access': str(token.access_token)}
 
     def create(self, data):
+
+        user = self.context['request'].user
+        new_user_role = data.get('role')
+        new_user_organization = data.get('organization')
+
+        if user.role == User.Role.MANAGER and new_user_role in [User.Role.ADMINISTRATOR, User.Role.MANAGER]:
+            raise ValidationError({'role': ['not enough permissions']})
+
+        if user.role == User.Role.MANAGER and new_user_organization not in user.organization:
+            raise ValidationError({'role': ['not enough permissions']})
+
+        if new_user_role == User.Role.CLIENT and new_user_organization.lenth() > 1:
+            raise ValidationError({'role': ['user with this role can be added to one organization only']})
+
         if not data.get('password') or not data.get('confirm_password'):
-            raise ValidationError(
-                {"password": ['Please enter a password and confirm it.']})
+            raise ValidationError({"password": ['Please enter a password and confirm it.']})
 
         if data.get('password') != data.get('confirm_password'):
-            raise ValidationError(
-                {"password": ["Those passwords don't match."]})
+            raise ValidationError({"password": ["Those passwords don't match."]})
 
         if re.search(r'\p{IsCyrillic}', data.get('password')):
-            raise ValidationError(
-                {"password": ["Password should not contain cyrillic symbols."]})
+            raise ValidationError({"password": ["Password should not contain cyrillic symbols."]})
 
         password = data.pop('password')
         data.pop('confirm_password')
@@ -82,6 +88,21 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+
+        user = self.context['request'].user
+        new_user_role = validated_data.get('role')
+        new_user_organization = validated_data.get('organization')
+
+        if user.role == User.Role.MANAGER \
+                and validated_data.get('role') in [User.Role.ADMINISTRATOR, User.Role.MANAGER]:
+            raise ValidationError({'role': ['not enough permissions']})
+
+        if user.role == User.Role.MANAGER and new_user_organization not in user.organization:
+            raise ValidationError({'role': ['not enough permissions']})
+
+        if new_user_role == User.Role.CLIENT and new_user_organization.lenth() > 1:
+            raise ValidationError({'role': ['user with this role can be added to the one organization only']})
+
         user = super().update(instance, validated_data)
         user.save()
 
