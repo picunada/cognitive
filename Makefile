@@ -7,18 +7,18 @@ check-env-%:
 		exit 1; \
 	fi
 
-up:
+build:
 	docker compose run frontend npm install
-	docker compose up -d --build
+	docker compose up --build
 
 shell:
-	docker compose exec app ./manage.py shell
+	docker compose exec backend ./manage.py shell
 
 test:
-	docker compose run app ./manage.py test
+	docker compose run backend ./manage.py test
 
 admin:
-	docker compose run app ./manage.py createsuperuser
+	docker compose run backend ./manage.py createsuperuser
 
 fixtures:
-	docker compose run app ./manage.py fixtures
+	docker compose run backend ./manage.py fixtures

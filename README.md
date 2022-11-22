@@ -1,6 +1,7 @@
-AI-House license service
+AI-House license service.
 
-
+The service has 4 permissions levels(roles) Administrator(superuser), Manager,
+Client and API Client. <br>Main Usecase for all roles are described below.
 
 ### Configure .env file
 ```
@@ -8,10 +9,15 @@ AI-House license service
 ❯ nano backend/.env
 ```
 
+### Run local 
+```
+❯ docker compose up
+```
+
 ### Use main commands
 ```
+❯ make build - build and start development containers
 ❯ make test - start tests
-❯ make up - build and start development containers
 ❯ make admin - create superuser
 ❯ make shell - launch django shell
 ```
@@ -23,22 +29,32 @@ http://127.0.0.1:8000/api/v1/swagger/
 
 ### Frontend
 ```
-http://lockalhost:3333/
+http://localhost:3333/
 ```
-
-## Main Usecase descriptions
-
-Admin frontend Usecase:
+Admin Usecase:
 - create/update/delete all organizations
 - get all organization transactions and balances
-- create/update/delete users with Client role
-- create/update/delete any organization API keys
+- get/create/update/delete any users with Manager and Client roles
+- create any organization API keys
 
-Client frontend Usecase:
+Manager Usecase:
+- get own organization's statistic, transactions and balances
+- get/create/update/delete users with Client role for own organization's
+- create own organization's API keys
+
+Client Usecase:
 - get own organization statistic, transactions and balance
-- create/update/delete own organization API keys
+- create own organization API keys
 
-With API-key backend authorization and message singe Usecase:
-- get message from request payload and organization from API-key
-- return message singed with organization RSA-key
+### API Client methods
+```
+GET /api/v1/organization/get_balance/
+```
+```
+POST /api/v1/organization/sign_message/
+```
+
+API Client Usecase:
+- get organization balance
+- sine message
 
