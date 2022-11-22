@@ -25,7 +25,7 @@ from cognitive.apps.organization.models import Organization, OrganizationAPIKey
 from cognitive.apps.transaction.models import Transaction
 
 
-def get_key(key):
+def parse_organization_key(key):
     key = key[:31] + '\n' + key[31:]
     key = key[:-29] + '\n' + key[-29:]
     key = serialization.load_pem_private_key(str.encode(key), password=None)
@@ -62,6 +62,15 @@ class OrganizationViewSet(ExtendedModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if AdminPermissions().has_permission(self.request, self):
+            return queryset
+        if ManagerPermissions().has_permission(self.request, self) and self.action == 'list':
+            queryset = queryset.filter(
+                organization__users__exact=self.request.user.pk)
+        if ClientPermissions().has_permission(self.request, self) and self.action == 'list':
+            queryset = queryset.filter(
+                organization__users__exact=self.request.user.pk)
+
         return queryset
 
     @action(methods=['get'], detail=True, url_path='generate_key')
@@ -97,14 +106,19 @@ class OrganizationViewSet(ExtendedModelViewSet):
             error = {'errors': {'balance': 'low balance'}}
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
+        # prepare organization RSA key
+        sign_key = organization.hashed_key
+        sign_key = sign_key[:31] + '\n' + sign_key[31:]
+        sign_key = sign_key[:-29] + '\n' + sign_key[-29:]
+        sign_key = serialization.load_pem_private_key(str.encode(sign_key), password=None)
+
         # sign message
-        sign_key = get_key(organization.hashed_key)
         message_bytes = base64.b64decode(serializer['message'].value)
         signature = sign_key.sign(
             message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
         signed_message = base64.b64encode(signature).decode()
 
-        # create transaction and update balance
+        # create transaction and update organization balance
         Transaction.objects.create(organization=organization)
         organization.balance -= 1
         organization.save()
