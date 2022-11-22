@@ -33,18 +33,17 @@ class UserManager(BaseUserManager):
         return self.create_user(email=self.normalize_email(email), password=password, **extra_fields)
 
 
-class Roles(models.TextChoices):
-    CLIENT = 'client', _('Client')
-    MANAGER = 'manager', _('Manager')
-    ADMINISTRATOR = 'administrator', _('Administrator')
-
-
 class User(AbstractBaseUser, PermissionsMixin):
+
+    class Role(models.TextChoices):
+        CLIENT = 'client', _('Client')
+        MANAGER = 'manager', _('Manager')
+        ADMINISTRATOR = 'administrator', _('Administrator')
 
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     role = models.CharField(
-        max_length=24, choices=Roles.choices, default='employee')
+        max_length=24, choices=Role.choices, default=Role.CLIENT)
     email = models.EmailField(_('email address'), unique=True)
     organization = models.ManyToManyField(
         Organization, related_name='users', blank=True)
