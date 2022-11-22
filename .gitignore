@@ -14,4 +14,5 @@ backend/media
 /config/.djangoenv
 .env
 .djangoenv
+.vscode
 node_modules

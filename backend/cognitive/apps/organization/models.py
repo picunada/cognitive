@@ -4,10 +4,12 @@ from rest_framework_api_key.models import AbstractAPIKey, BaseAPIKeyManager
 from rest_framework_api_key.crypto import KeyGenerator
 
 
+class Status(models.TextChoices):
+    ACTIVE = "active"
+    BLOCKED = "blocked"
+
+
 class Organization(CreatedDeletedModel):
-    class Status(models.TextChoices):
-        ACTIVE = "active"
-        BLOCKED = "blocked"
 
     name = models.CharField(max_length=64)
     hashed_key = models.CharField(max_length=4096)
@@ -30,5 +32,5 @@ class OrganizationAPIKey(AbstractAPIKey):
     objects = OrganizationAPIKeyManager()
 
     class Meta(AbstractAPIKey.Meta):
-        verbose_name = "Device API key"
-        verbose_name_plural = "Device API keys"
+        verbose_name = "Organization API key"
+        verbose_name_plural = "Organization API keys"
