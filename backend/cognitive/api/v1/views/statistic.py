@@ -8,11 +8,11 @@ from cognitive.apps.transaction.models import Transaction
 
 class Statistic(APIView):
 
-    permission_classes = (AdminPermissions | ManagerPermissions | ClientPermissions)
+    permission_classes = [AdminPermissions | ManagerPermissions | ClientPermissions]
 
     def get(self, request):
         data = {}
-        user = self.context['request'].user
+        user = request.user
 
         if user.role == User.Role.ADMINISTRATOR:
             organizations = Organization.objects.non_deleted().count()

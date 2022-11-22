@@ -25,13 +25,6 @@ from cognitive.apps.organization.models import Organization, OrganizationAPIKey
 from cognitive.apps.transaction.models import Transaction
 
 
-def parse_organization_key(key):
-    key = key[:31] + '\n' + key[31:]
-    key = key[:-29] + '\n' + key[-29:]
-    key = serialization.load_pem_private_key(str.encode(key), password=None)
-    return key
-
-
 class OrganizationViewSet(ExtendedModelViewSet):
     queryset = Organization.objects.non_deleted()
     serializer_class = OrganizationListSerializer

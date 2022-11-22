@@ -1,21 +1,20 @@
-# Stage 1 - build frontend app
-FROM node:18-alpine as frontend
+FROM node:18-alpine as build-stage
 
-# Creating folders, and files for a project
 WORKDIR /app
+RUN corepack enable
+
+COPY .npmrc package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
+    pnpm install --frozen-lockfile
+from project.apps.payment.models import Payment
 COPY frontend /app
 COPY .env /app/.env
+RUN pnpm build
 
-# Project initialization
-RUN npm install
-RUN npm rebuild node-sass
-RUN npm run build
+FROM nginx:stable-alpine as production-stage
 
-# Stage 2 - nginx & frontend dist
-FROM nginx:alpine
+COPY --from=build-stage /app/dist /vue
+EXPOSE 80
 
-# copy files and settings
-COPY --from=frontend /app/dist/ /vue
-
-# run nginx
 CMD ["nginx", "-g", "daemon off;"]
+

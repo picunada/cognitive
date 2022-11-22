@@ -62,7 +62,7 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         if user.role == User.Role.MANAGER and new_user_organization not in user.organization:
             raise ValidationError({'role': ['not enough permissions']})
 
-        if new_user_role == User.Role.CLIENT and new_user_organization.lenth() > 1:
+        if new_user_role == User.Role.CLIENT and len(new_user_organization) > 1:
             raise ValidationError({'role': ['user with this role can be added to one organization only']})
 
         if not data.get('password') or not data.get('confirm_password'):
@@ -100,7 +100,7 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         if user.role == User.Role.MANAGER and new_user_organization not in user.organization:
             raise ValidationError({'role': ['not enough permissions']})
 
-        if new_user_role == User.Role.CLIENT and new_user_organization.lenth() > 1:
+        if new_user_role == User.Role.CLIENT and len(new_user_organization) > 1:
             raise ValidationError({'role': ['user with this role can be added to the one organization only']})
 
         user = super().update(instance, validated_data)
