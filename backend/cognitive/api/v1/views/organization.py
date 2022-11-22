@@ -90,7 +90,8 @@ class OrganizationViewSet(ExtendedModelViewSet):
         except Exception:
             return serializers.ValidationError()
         try:
-            organization = OrganizationAPIKey.objects.get_from_key(key).organization
+            organization = OrganizationAPIKey.objects.get_from_key(
+                key).organization
         except Exception:
             return serializers.ValidationError()
 
@@ -113,10 +114,13 @@ class OrganizationViewSet(ExtendedModelViewSet):
         sign_key = serialization.load_pem_private_key(str.encode(sign_key), password=None)
 
         # sign message
-        message_bytes = base64.b64decode(serializer['message'].value)
-        signature = sign_key.sign(
-            message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
-        signed_message = base64.b64encode(signature).decode()
+        try:
+            message_bytes = base64.b64decode(serializer['message'].value)
+            signature = sign_key.sign(message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
+            signed_message = base64.b64encode(signature).decode()
+        except ValueError as e:
+            error = {'errors': {'error': f'{e}'}}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
         # create transaction and update organization balance
         Transaction.objects.create(organization=organization)

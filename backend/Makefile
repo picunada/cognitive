@@ -13,6 +13,9 @@ django_migrate:
 	./manage.py makemigrations
 	./manage.py migrate -v 3 --noinput
 
+test:
+	./manage.py test
+
 collectstatic:
 	./manage.py collectstatic --noinput
 
