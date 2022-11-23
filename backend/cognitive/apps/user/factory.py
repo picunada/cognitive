@@ -1,10 +1,10 @@
-from .models import Roles, User
+from .models import User
 from typing import Any, Sequence
 from faker import Faker as FakerClass
 from factory import django, Faker, post_generation
 fake = FakerClass()
 
-ROLES_VALUES = [x[0] for x in Roles.choices]
+ROLES_VALUES = [x[0] for x in User.Role.choices]
 
 
 class UserFactory(django.DjangoModelFactory):

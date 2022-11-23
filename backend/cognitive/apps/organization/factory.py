@@ -1,8 +1,8 @@
-from .models import Organization, Status
+from .models import Organization
 from faker import Faker as FakerClass
 from factory import django, Faker, post_generation
 
-STATUS_VALUES = [x[0] for x in Status.choices]
+STATUS_VALUES = [x[0] for x in Organization.Status.choices]
 fake = FakerClass()
 
 

@@ -40,7 +40,8 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'organization', 'password', 'confirm_password',
                   'token',)
         read_only_fields = ('id', 'token')
-        extra_kwargs = {'password': {'write_only': True}, 'rsa_key': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True},
+                        'rsa_key': {'write_only': True}}
 
     @staticmethod
     def get_token(user):
@@ -59,20 +60,24 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         if user.role == User.Role.MANAGER and new_user_role in [User.Role.ADMINISTRATOR, User.Role.MANAGER]:
             raise ValidationError({'role': ['not enough permissions']})
 
-        if user.role == User.Role.MANAGER and new_user_organization not in user.organization:
+        if user.role == User.Role.MANAGER and not all(elem in user.organization.all() for elem in new_user_organization):
             raise ValidationError({'role': ['not enough permissions']})
 
         if new_user_role == User.Role.CLIENT and len(new_user_organization) > 1:
-            raise ValidationError({'role': ['user with this role can be added to one organization only']})
+            raise ValidationError(
+                {'role': ['user with this role can be added to one organization only']})
 
         if not data.get('password') or not data.get('confirm_password'):
-            raise ValidationError({"password": ['Please enter a password and confirm it.']})
+            raise ValidationError(
+                {"password": ['Please enter a password and confirm it.']})
 
         if data.get('password') != data.get('confirm_password'):
-            raise ValidationError({"password": ["Those passwords don't match."]})
+            raise ValidationError(
+                {"password": ["Those passwords don't match."]})
 
         if re.search(r'\p{IsCyrillic}', data.get('password')):
-            raise ValidationError({"password": ["Password should not contain cyrillic symbols."]})
+            raise ValidationError(
+                {"password": ["Password should not contain cyrillic symbols."]})
 
         password = data.pop('password')
         data.pop('confirm_password')
@@ -97,11 +102,16 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
                 and validated_data.get('role') in [User.Role.ADMINISTRATOR, User.Role.MANAGER]:
             raise ValidationError({'role': ['not enough permissions']})
 
-        if user.role == User.Role.MANAGER and new_user_organization not in user.organization:
-            raise ValidationError({'role': ['not enough permissions']})
+        if new_user_organization == None and user.role != User.Role.ADMINISTRATOR:
+            raise ValidationError(
+                {'error': ['can`t update user with no organization']})
+        else:
+            if user.role == User.Role.MANAGER and not all(elem in user.organization.all() for elem in new_user_organization):
+                raise ValidationError({'role': ['not enough permissions']})
 
         if new_user_role == User.Role.CLIENT and len(new_user_organization) > 1:
-            raise ValidationError({'role': ['user with this role can be added to the one organization only']})
+            raise ValidationError(
+                {'role': ['user with this role can be added to the one organization only']})
 
         user = super().update(instance, validated_data)
         user.save()
