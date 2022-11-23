@@ -187,13 +187,13 @@ class UserTestCases(APITestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
-        # Should return 201 CREATED status
+        # Should return 204 NO CONTENT status
         response = self.client.delete(
             f'{self.user_url}{own_client.id}/')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # Should return 201 CREATED status
+        # Should return 400 BAD REQUEST status
         response = self.client.delete(
             f'{self.user_url}{not_own_client.id}/')
 

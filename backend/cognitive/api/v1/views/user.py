@@ -50,6 +50,16 @@ class UserViewSet(ExtendedModelViewSet):
 
         return queryset.distinct()
 
+    def destroy(self, request, *args, **kwargs):
+        user = self.request.user
+        instance = self.get_object()
+
+        if user.role != User.Role.ADMINISTRATOR and not all(elem in user.organization.all() for elem in instance.organization.all()):
+            return Response({'role': ['not enough permissions']}, status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(methods=['get'], filter_backends=[], detail=False)
     def my(self, request):
         queryset = User.objects.filter(id=request.user.pk).get()
