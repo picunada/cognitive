@@ -14,7 +14,7 @@ export interface UserRetrieve extends User {
 }
 
 export interface UserCreate extends User {
-  organization: [number]
+  organization: Organization[]
   password: string
   confirm_password: string
 }

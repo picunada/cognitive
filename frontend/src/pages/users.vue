@@ -11,6 +11,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
+import type { Organization } from '~/models/organization'
 
 import type { UserCreate } from '~/models/user'
 import { Roles } from '~/models/user'
@@ -23,9 +24,11 @@ const isOpen = ref<boolean>(false)
 const user = ref<UserCreate>({
   first_name: '',
   last_name: '',
+  email: '',
+  role: '',
   password: '',
   confirm_password: '',
-  organization: [] as number[],
+  organization: [] as Organization[],
 } as UserCreate)
 
 const selectedOrganization = ref()
@@ -117,7 +120,7 @@ watch(selectedOrganization, (newV) => {
                     <p text-13px mb1 ml2 opacity-40>
                       Role
                     </p>
-                    <ComboBox v-model:value="user.role" :iterable="roles" />
+                    <ComboBox v-model:value="user.role" :iterable="roles as [string]" />
                   </div>
                   <div>
                     <p text-13px mb1 ml2 opacity-40>
@@ -125,10 +128,15 @@ watch(selectedOrganization, (newV) => {
                     </p>
                     <Combobox v-model="user.organization" multiple>
                       <div class="relative">
-                        <div class="group relative w-full px3 text-field p0">
+                        <div v-auto-animate class="group relative w-full px3 text-field h-auto p1">
+                          <ul v-auto-animate f="user.organization.length > 0" flex flex-col mr2 gap1>
+                            <li v-for="org in user.organization" :key="org.id">
+                              {{ org.name }}
+                            </li>
+                          </ul>
                           <div i-ph:magnifying-glass />
                           <ComboboxInput
-                            class="text-field p2 w-full" :display-value="(item: any) => item as string"
+                            class="text-field p2 w-full" :display-value="(item: any) => item?.name"
                             @change="query = $event.target.value"
                           />
                           <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">

@@ -61,6 +61,7 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   const createUser = async (user: User) => {
+    user.organization = user.organization.map(org => org.id)
     await fetch(`${BASE_URL}/api/v1/user/`, {
       method: 'POST',
       headers: {
