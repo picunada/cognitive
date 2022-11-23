@@ -46,7 +46,7 @@ class UserViewSet(ExtendedModelViewSet):
         if AdminPermissions().has_permission(self.request, self):
             return queryset
         if ManagerPermissions().has_permission(self.request, self):
-            queryset = queryset.filter(role=User.CLIENT)
+            queryset = queryset.filter(role=User.Role.CLIENT)
 
         return queryset.distinct()
 

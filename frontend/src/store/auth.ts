@@ -1,7 +1,7 @@
 import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { ComputedRef } from 'vue'
-import type { User } from '~/models/user'
+import type { UserRetrieve } from '~/models/user'
 
 const BASE_URL = import.meta.env.VITE_URL
 
@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
    */
   const accessToken = useStorage('access_token', '')
   const refreshToken = useStorage('refresh', '')
-  const user = ref<User>()
+  const user = ref<UserRetrieve>()
   const authError = ref<string>()
 
   const { notify } = useNotification()
@@ -51,22 +51,14 @@ export const useAuthStore = defineStore('auth', () => {
       },
     }).then(async (response) => {
       if (response.status !== 200 && response.status !== 201) {
-        const data = await response.json()
-        let errorText = ''
-        Object.entries(data).forEach((entry) => {
-          const [k, v] = entry
-          errorText += `${k}: ${v} \n`
-        })
-        notify({
-          title: 'Error',
-          type: 'error',
-          text: errorText,
-        })
+        accessToken.value = undefined
+        refreshToken.value = undefined
       }
       else {
-        const data = await response.json() as User
+        const data = await response.json() as UserRetrieve
         user.value = data
-    }}).catch((error) => {
+      }
+    }).catch((error) => {
       notify({
         title: 'Error',
         type: 'error',

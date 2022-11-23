@@ -1,7 +1,7 @@
 import { useNotification } from '@kyvg/vue3-notification'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { Pagination } from '~/models/utils'
-import type { User, UserRetrieve } from '~/models/user'
+import type { User } from '~/models/user'
 
 const BASE_URL = import.meta.env.VITE_URL
 
@@ -97,44 +97,46 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   const deleteUser = async (id: number) => {
-    await fetch(`${BASE_URL}/api/v1/user/${id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${auth.accessToken}`,
-        'Content-Type': 'application/json',
-        'accept': 'application/json',
-      },
-    })
-      .then(async (response) => {
-        if (response.status !== 204) {
-          const data = await response.json()
-          let errorText = ''
-          Object.entries(data).forEach((entry) => {
-            const [k, v] = entry
-            errorText += `${k}: ${v} \n`
-          })
+    if (confirm('Do you really want to delete?')) {
+      await fetch(`${BASE_URL}/api/v1/user/${id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${auth.accessToken}`,
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        },
+      })
+        .then(async (response) => {
+          if (response.status !== 204) {
+            const data = await response.json()
+            let errorText = ''
+            Object.entries(data).forEach((entry) => {
+              const [k, v] = entry
+              errorText += `${k}: ${v} \n`
+            })
+            notify({
+              title: 'Error',
+              type: 'error',
+              text: errorText,
+            })
+          }
+          else {
+            await fetchUsers({ page: currentPage.value })
+          }
+        })
+        .catch((err) => {
+          userError.value = err
           notify({
             title: 'Error',
             type: 'error',
-            text: errorText,
+            text: err,
           })
-        }
-        else {
-          await fetchUsers({ page: currentPage.value })
-        }
-      })
-      .catch((err) => {
-        userError.value = err
-        notify({
-          title: 'Error',
-          type: 'error',
-          text: err,
         })
-      })
+    }
   }
 
   const updateUser = async (id: number, user: User) => {
-    user.organization = user.organization.map((org) => org.id)
+    user.organization = user.organization.map(org => org.id)
     await fetch(`${BASE_URL}/api/v1/user/${id}/`, {
       method: 'PATCH',
       headers: {

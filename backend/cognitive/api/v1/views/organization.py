@@ -59,10 +59,10 @@ class OrganizationViewSet(ExtendedModelViewSet):
             return queryset
         if ManagerPermissions().has_permission(self.request, self) and self.action == 'list':
             queryset = queryset.filter(
-                organization__users__exact=self.request.user.pk)
+                users__exact=self.request.user.pk)
         if ClientPermissions().has_permission(self.request, self) and self.action == 'list':
             queryset = queryset.filter(
-                organization__users__exact=self.request.user.pk)
+                users__exact=self.request.user.pk)
 
         return queryset
 
@@ -104,12 +104,14 @@ class OrganizationViewSet(ExtendedModelViewSet):
         sign_key = organization.hashed_key
         sign_key = sign_key[:31] + '\n' + sign_key[31:]
         sign_key = sign_key[:-29] + '\n' + sign_key[-29:]
-        sign_key = serialization.load_pem_private_key(str.encode(sign_key), password=None)
+        sign_key = serialization.load_pem_private_key(
+            str.encode(sign_key), password=None)
 
         # sign message
         try:
             message_bytes = base64.b64decode(serializer['message'].value)
-            signature = sign_key.sign(message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
+            signature = sign_key.sign(
+                message_bytes, padding.PKCS1v15(), utils.Prehashed(hashes.SHA1()))
             signed_message = base64.b64encode(signature).decode()
         except ValueError as e:
             error = {'errors': {'error': f'{e}'}}

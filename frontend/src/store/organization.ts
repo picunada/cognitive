@@ -86,30 +86,32 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   const generateKeyForOrganization = async (id: number) => {
-    await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key/`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`,
-        accept: 'application/json',
-      },
-    }).then(async (response) => {
-      if (response.status !== 200) {
-        const data = await response.json()
-        let errorText = ''
-        Object.entries(data).forEach((entry) => {
-          const [k, v] = entry
-          errorText += `${k}: ${v} \n`
-        })
-        notify({
-          title: 'Error',
-          type: 'error',
-          text: errorText,
-        })
-      }
-      else {
-        alert(`New key: ${await response.json()}`)
-      }
-    }).catch(err => organizationError.value = err)
+    if (confirm('Do you really want to generate new key?')) {
+      await fetch(`${BASE_URL}/api/v1/organization/${id}/generate_key/`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+          accept: 'application/json',
+        },
+      }).then(async (response) => {
+        if (response.status !== 200) {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+        else {
+          alert(`New key: ${await response.json()}`)
+        }
+      }).catch(err => organizationError.value = err)
+    }
   }
 
   const createOrganization = async (organization: Organization) => {
@@ -142,31 +144,33 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   const deleteOrganization = async (id: number) => {
-    await fetch(`${BASE_URL}/api/v1/organization/${id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${auth.accessToken}`,
-        'Content-Type': 'application/json',
-        'accept': 'application/json',
-      },
-    }).then(async (response) => {
-      if (response.status !== 204) {
-        const data = await response.json()
-        let errorText = ''
-        Object.entries(data).forEach((entry) => {
-          const [k, v] = entry
-          errorText += `${k}: ${v} \n`
-        })
-        notify({
-          title: 'Error',
-          type: 'error',
-          text: errorText,
-        })
-      }
-      else {
-        await fetchOrganizations({ page: currentPage.value })
-      }
-    }).catch(err => organizationError.value = err)
+    if (confirm('Do you really want to delete?')) {
+      await fetch(`${BASE_URL}/api/v1/organization/${id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${auth.accessToken}`,
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        },
+      }).then(async (response) => {
+        if (response.status !== 204) {
+          const data = await response.json()
+          let errorText = ''
+          Object.entries(data).forEach((entry) => {
+            const [k, v] = entry
+            errorText += `${k}: ${v} \n`
+          })
+          notify({
+            title: 'Error',
+            type: 'error',
+            text: errorText,
+          })
+        }
+        else {
+          await fetchOrganizations({ page: currentPage.value })
+        }
+      }).catch(err => organizationError.value = err)
+    }
   }
 
   const updateOrganization = async (id: number, organization: Organization) => {
@@ -224,7 +228,7 @@ export const useOrganizationStore = defineStore('organization', () => {
     generateKeyForOrganization,
     createOrganization,
     updateOrganization,
-    fetchStatistic
+    fetchStatistic,
   }
 })
 

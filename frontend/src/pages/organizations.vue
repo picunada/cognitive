@@ -10,6 +10,7 @@ import type { Organization } from '~/models/organization'
 import { Status } from '~/models/organization'
 
 const organizationStore = useOrganizationStore()
+const auth = useAuthStore()
 
 const isOpen = ref<boolean>(false)
 const organization = ref<Organization>({} as Organization)
@@ -30,7 +31,7 @@ function openModal() {
       <h2 title1>
         Organizations
       </h2>
-      <button btn text-lg @click="openModal">
+      <button v-if="auth.user?.role === 'administrator'" btn text-lg @click="openModal">
         Create organization
       </button>
     </div>
@@ -44,18 +45,23 @@ function openModal() {
   </div>
   <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" class="relative z-10" @close="closeModal">
-      <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
-        leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
+      <TransitionChild
+        as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+        leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0"
+      >
         <div class="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center">
-          <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
+          <TransitionChild
+            as="template" enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
             enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100"
-            leave-to="opacity-0 scale-95">
+            leave-to="opacity-0 scale-95"
+          >
             <DialogPanel
-              class="w-full max-w-xl transform rounded-10px bg-white dark:bg-dark-800  p4 text-left align-middle shadow-xl transition-all">
+              class="w-full max-w-xl transform rounded-10px bg-white dark:bg-dark-800  p4 text-left align-middle shadow-xl transition-all"
+            >
               <DialogTitle as="h3" title2 mb3>
                 Create organization
               </DialogTitle>
@@ -79,9 +85,15 @@ function openModal() {
                     </p>
                     <ComboBox v-model:value="organization.status" :iterable="statuses" />
                   </div>
+                  <div>
+                    <p text-13px mb1 ml2 opacity-40>
+                      Balance
+                    </p>
+                    <input v-model="organization.balance" animation text-field w-full type="text">
+                  </div>
                 </div>
 
-                <div flex justify-between mt5 gap2>
+                <div flex justify-end mt5 gap2>
                   <input type="submit" value="Submit" btn text-lg>
                   <button type="button" btn text-lg @click="closeModal">
                     Close

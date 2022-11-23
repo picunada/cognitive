@@ -1,5 +1,4 @@
-import { Organization } from "./organization"
-
+import type { Organization } from './organization'
 
 export interface User {
   id: number
@@ -11,7 +10,7 @@ export interface User {
 }
 
 export interface UserRetrieve extends User {
-  organization: [Organization]
+  organization: Organization[]
 }
 
 export interface UserCreate extends User {

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const transactionStore = useTransactionsStore()
-const auth = useAuthStore()
 
 onMounted(async () => {
   await transactionStore.fetchTransactions({ page: transactionStore.currentPage })
@@ -9,9 +8,8 @@ onMounted(async () => {
 
 <template>
   <div flex my5 justify-between>
-    <h2 title2>Transactions</h2>
-    <h2 v-if="auth.user?.organization.balance">
-      Balance: {{ auth.user?.organization.balance }}
+    <h2 title2>
+      Transactions
     </h2>
   </div>
 
