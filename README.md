@@ -9,10 +9,15 @@ Client and API Client. <br>Main Usecase for all roles are described below.
 ❯ nano backend/.env
 ```
 
-### Run local 
+### Build
 ```
 ❯ docker compose build
 ❯ docker compose run frontend npm i
+```
+
+### Run local 
+```
+❯ docker compose up
 ```
 
 ### Use main commands
