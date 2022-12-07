@@ -11,7 +11,8 @@ Client and API Client. <br>Main Usecase for all roles are described below.
 
 ### Run local 
 ```
-❯ docker compose up
+❯ docker compose build
+❯ docker compose run frontend npm i
 ```
 
 ### Use main commands
